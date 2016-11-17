@@ -1,9 +1,9 @@
-package cc.rome753;
+package cc.rome753.fullstack;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ScrollView;
@@ -14,12 +14,17 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import cc.rome753.evnet.WebSocketCloseEvent;
-import cc.rome753.evnet.WebSocketFailureEvent;
-import cc.rome753.evnet.WebSocketMessageEvent;
-import cc.rome753.evnet.WebSocketOpenEvent;
+import cc.rome753.fullstack.evnet.WebSocketCloseEvent;
+import cc.rome753.fullstack.evnet.WebSocketFailureEvent;
+import cc.rome753.fullstack.evnet.WebSocketMessageEvent;
+import cc.rome753.fullstack.evnet.WebSocketOpenEvent;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
+
+    public static void start(BaseActivity activity){
+        Intent i = new Intent(activity, MainActivity.class);
+        activity.startActivity(i);
+    }
 
     TextView tv;
     EditText et;
@@ -44,10 +49,6 @@ public class MainActivity extends AppCompatActivity {
         String msg = et.getText().toString().trim();
         WebSocketManager.INSTANCE.send(msg);
         et.setText("");
-    }
-
-    public void onClose(View view) {
-        OkhttpManager.post("","");
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -97,4 +98,18 @@ public class MainActivity extends AppCompatActivity {
         EventBus.getDefault().unregister(this);
     }
 
+    @Override
+    public int setView() {
+        return R.layout.activity_main;
+    }
+
+    @Override
+    public void initData() {
+
+    }
+
+    @Override
+    public void initView() {
+
+    }
 }

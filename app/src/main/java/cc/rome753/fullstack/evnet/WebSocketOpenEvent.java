@@ -1,4 +1,4 @@
-package cc.rome753.evnet;
+package cc.rome753.fullstack.evnet;
 
 /**
  * Created by crc on 16/11/15.

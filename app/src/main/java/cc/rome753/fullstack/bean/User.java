@@ -1,4 +1,4 @@
-package cc.rome753.bean;
+package cc.rome753.fullstack.bean;
 
 /**
  * Created by crc on 16/11/17.

@@ -1,4 +1,4 @@
-package cc.rome753;
+package cc.rome753.fullstack;
 
 import android.text.TextUtils;
 import android.util.Log;
@@ -7,10 +7,10 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
 
-import cc.rome753.evnet.WebSocketCloseEvent;
-import cc.rome753.evnet.WebSocketFailureEvent;
-import cc.rome753.evnet.WebSocketMessageEvent;
-import cc.rome753.evnet.WebSocketOpenEvent;
+import cc.rome753.fullstack.evnet.WebSocketCloseEvent;
+import cc.rome753.fullstack.evnet.WebSocketFailureEvent;
+import cc.rome753.fullstack.evnet.WebSocketMessageEvent;
+import cc.rome753.fullstack.evnet.WebSocketOpenEvent;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;

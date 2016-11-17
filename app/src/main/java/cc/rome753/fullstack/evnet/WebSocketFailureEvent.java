@@ -1,17 +1,17 @@
-package cc.rome753.evnet;
+package cc.rome753.fullstack.evnet;
 
 /**
  * Created by crc on 16/11/15.
  */
 
-public class WebSocketMessageEvent {
+public class WebSocketFailureEvent {
     private String msg;
 
     public String getMessage() {
         return msg;
     }
 
-    public WebSocketMessageEvent(String msg){
+    public WebSocketFailureEvent(String msg){
         this.msg = msg;
     }
 }
