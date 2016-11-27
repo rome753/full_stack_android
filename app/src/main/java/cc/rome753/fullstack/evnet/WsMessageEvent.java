@@ -4,14 +4,14 @@ package cc.rome753.fullstack.evnet;
  * Created by crc on 16/11/15.
  */
 
-public class WebSocketMessageEvent {
+public class WsMessageEvent {
     private String msg;
 
     public String getMessage() {
         return msg;
     }
 
-    public WebSocketMessageEvent(String msg){
+    public WsMessageEvent(String msg){
         this.msg = msg;
     }
 }

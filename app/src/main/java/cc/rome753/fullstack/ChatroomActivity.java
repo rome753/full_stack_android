@@ -14,15 +14,16 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import cc.rome753.fullstack.evnet.WebSocketCloseEvent;
-import cc.rome753.fullstack.evnet.WebSocketFailureEvent;
-import cc.rome753.fullstack.evnet.WebSocketMessageEvent;
-import cc.rome753.fullstack.evnet.WebSocketOpenEvent;
+import cc.rome753.fullstack.evnet.WsCloseEvent;
+import cc.rome753.fullstack.evnet.WsFailureEvent;
+import cc.rome753.fullstack.evnet.WsMsg2AllEvent;
+import cc.rome753.fullstack.evnet.WsOpenEvent;
 
-public class MainActivity extends BaseActivity {
+
+public class ChatroomActivity extends BaseActivity {
 
     public static void start(BaseActivity activity){
-        Intent i = new Intent(activity, MainActivity.class);
+        Intent i = new Intent(activity, ChatroomActivity.class);
         activity.startActivity(i);
     }
 
@@ -43,33 +44,35 @@ public class MainActivity extends BaseActivity {
         et = (EditText) findViewById(R.id.et);
         sv = (ScrollView) findViewById(R.id.sv);
 
+        ChatManager.connect();
     }
 
     public void onClick(View v){
         String msg = et.getText().toString().trim();
-        WebSocketManager.INSTANCE.send(msg);
-        et.setText("");
+        if(ChatManager.send2All(msg)) {
+            et.setText("");
+        }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onWebSocketOpenEvent(WebSocketOpenEvent event){
+    public void onWebSocketOpenEvent(WsOpenEvent event){
         Toast.makeText(this, "open", Toast.LENGTH_SHORT).show();
     }
     
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onWebSocketCloseEvent(WebSocketCloseEvent event){
+    public void onWebSocketCloseEvent(WsCloseEvent event){
         Toast.makeText(this, "Close", Toast.LENGTH_SHORT).show();
     }
     
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onWebSocketMessageEvent(WebSocketMessageEvent event){
+    public void onWsMsg2AllEvent(WsMsg2AllEvent event){
         if(tv != null){
-            tv.append(event.getMessage() + "\n");
+            tv.append(event.from+"说："+event.msg + "\n");
         }
     }  
     
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onWebSocketFailureEvent(WebSocketFailureEvent event){
+    public void onWebSocketFailureEvent(WsFailureEvent event){
         if(et != null){
             et.setText(event.getMessage());
         }
@@ -94,8 +97,8 @@ public class MainActivity extends BaseActivity {
 
     @Override
     protected void onStop() {
-        super.onPause();
         EventBus.getDefault().unregister(this);
+        super.onPause();
     }
 
     @Override

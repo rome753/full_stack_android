@@ -4,14 +4,14 @@ package cc.rome753.fullstack.bean;
  * Created by crc on 16/11/17.
  */
 
-public class User {
+public class Login {
 
     String username;
     String password;
 
-    public User(){}
+    public Login(){}
 
-    public User(String username, String password) {
+    public Login(String username, String password) {
         this.username = username;
         this.password = password;
     }

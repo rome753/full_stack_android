@@ -8,6 +8,7 @@
 
     <ScrollView
         android:id="@+id/sv"
+        android:background="#ddd"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
@@ -32,12 +33,6 @@
     <Button
         android:onClick="onClick"
         android:text="send"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-
-    <Button
-        android:onClick="onClose"
-        android:text="close"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
