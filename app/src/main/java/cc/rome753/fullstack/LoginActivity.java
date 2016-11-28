@@ -98,6 +98,19 @@ public class LoginActivity extends BaseActivity {
     }
 
 
+    @OnClick(R.id.btn_switch)
+    void switchs(){
+        String toLogin = getString(R.string.to_login);
+        String toRegister = getString(R.string.to_register);
+        boolean isLogin = mBtnSwitch.getText().toString().equals(toRegister);
+
+        mBtnSwitch.setText(isLogin ? toLogin : toRegister);
+        mEtEmail.setVisibility(isLogin ? View.VISIBLE : View.GONE);
+        mBtnRegister.setVisibility(isLogin ? View.VISIBLE : View.GONE);
+        mBtnLogin.setVisibility(isLogin ? View.GONE : View.VISIBLE);
+    }
+
+
     @Override
     public int setView() {
         return R.layout.activity_login;
@@ -113,20 +126,6 @@ public class LoginActivity extends BaseActivity {
         mEtUsername.setText("超哥");
         mEtPassword.setText("chao");
 
-        mBtnSwitch.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                String login = getString(R.string.to_login);
-                String register = getString(R.string.to_register);
-                boolean isLogin = mBtnSwitch.getText().toString().equals(login);
-
-                mBtnSwitch.setText(isLogin ? register : login);
-                mEtEmail.setVisibility(isLogin ? View.VISIBLE : View.GONE);
-                mBtnRegister.setVisibility(isLogin ? View.VISIBLE : View.GONE);
-                mBtnLogin.setVisibility(isLogin ? View.GONE : View.VISIBLE);
-            }
-        });
     }
 }
 
