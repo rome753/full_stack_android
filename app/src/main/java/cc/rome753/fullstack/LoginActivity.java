@@ -122,9 +122,6 @@ public class LoginActivity extends BaseActivity {
 
     @Override
     public void initView() {
-        mEtEmail.setText("rome753@163.com");
-        mEtUsername.setText("超哥");
-        mEtPassword.setText("chao");
 
     }
 }

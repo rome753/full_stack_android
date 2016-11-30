@@ -37,7 +37,7 @@ public class CookieManager implements CookieJar{
         return load(url);
     }
 
-    public static List<Cookie> load(HttpUrl url){
+    private static List<Cookie> load(HttpUrl url){
         List<Cookie> cookies = sUrlCookiesMap.get(SP_COOKIES_NAME);
         if(cookies == null){
             String json = sPrefs.getString(SP_COOKIES_NAME, "");
@@ -48,12 +48,12 @@ public class CookieManager implements CookieJar{
         return cookies;
     }
 
-    public static void save(HttpUrl url, List<Cookie> cookies){
+    private static void save(HttpUrl url, List<Cookie> cookies){
         if(Utils.isEmpty(cookies)) return;
         sUrlCookiesMap.put(SP_COOKIES_NAME, cookies);
-        if(cookies.size() > 0){
-            String id = cookies.get(0).value();
-            User.getUser().setId(id);
+        for(Cookie c : cookies){//从cookie中获取id和name保存到User类中
+            if("fsid".equals(c.name())) User.getUser().setId(c.value());
+            if("fsname".equals(c.name())) User.getUser().setName(c.value());
         }
         String json = new Gson().toJson(cookies);
         sPrefs.edit().putString(SP_COOKIES_NAME, json).apply();
