@@ -1,7 +1,9 @@
-package cc.rome753.fullstack;
+package cc.rome753.fullstack.manager;
 
 import android.content.SharedPreferences;
 import android.text.TextUtils;
+
+import cc.rome753.fullstack.App;
 
 /**
  * Created by rome753 on 2016/11/26.
@@ -15,7 +17,7 @@ public class User {
     private String name;
     public boolean online;
     
-    SharedPreferences mPrefs = App.sContext.getSharedPreferences(SP_USER, 0);
+    SharedPreferences mPrefs;
     
     private User(){}
     
@@ -30,12 +32,12 @@ public class User {
     public void setId(String id){
         if(TextUtils.isEmpty(id)) return;
         this.id = id;
-        mPrefs.edit().putString("id", id).apply();
+        getPrefs().edit().putString("id", id).apply();
     }
     
     public String getId(){
         if(TextUtils.isEmpty(id)){
-            id = mPrefs.getString("id", "");
+            id = getPrefs().getString("id", "");
         }
         return id;
     }
@@ -43,14 +45,27 @@ public class User {
     public void setName(String name){
         if(TextUtils.isEmpty(name)) return;
         this.name = name;
-        mPrefs.edit().putString("name", name).apply();
+        getPrefs().edit().putString("name", name).apply();
     }
     
     public String getName(){
         if(TextUtils.isEmpty(name)){
-            name = mPrefs.getString("name", "");
+            name = getPrefs().getString("name", "");
         }
         return name;
+    }
+
+    private SharedPreferences getPrefs(){
+        if(mPrefs == null)
+            mPrefs = App.sContext.getSharedPreferences(SP_USER, 0);
+        return mPrefs;
+    }
+
+    public void logout(){
+        id = "";
+        name = "";
+        getPrefs().edit().clear().apply();
+        CookieManager.clear();
     }
 
 }

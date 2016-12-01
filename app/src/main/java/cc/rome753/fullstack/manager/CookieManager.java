@@ -1,4 +1,4 @@
-package cc.rome753.fullstack;
+package cc.rome753.fullstack.manager;
 
 import android.content.SharedPreferences;
 
@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+import cc.rome753.fullstack.App;
+import cc.rome753.fullstack.Utils;
 import okhttp3.Cookie;
 import okhttp3.CookieJar;
 import okhttp3.HttpUrl;

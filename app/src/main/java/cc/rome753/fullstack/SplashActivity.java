@@ -1,9 +1,17 @@
 package cc.rome753.fullstack;
 
+import android.content.Intent;
 import android.text.TextUtils;
+
+import cc.rome753.fullstack.main.MainActivity;
+import cc.rome753.fullstack.manager.User;
 
 public class SplashActivity extends BaseActivity {
 
+    public static void start(BaseActivity activity){
+        Intent i = new Intent(activity, SplashActivity.class);
+        activity.startActivity(i);
+    }
 
     @Override
     public int setView() {
@@ -19,11 +27,11 @@ public class SplashActivity extends BaseActivity {
                 if(TextUtils.isEmpty(User.getUser().getId())){
                     LoginActivity.start(mActivity);
                 }else{
-                    ChatroomActivity.start(mActivity);
+                    MainActivity.start(mActivity);
                 }
                 finish();
             }
-        }, 500);
+        }, 100);
     }
 
     @Override

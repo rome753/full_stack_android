@@ -1,32 +1,31 @@
-package cc.rome753.fullstack;
+package cc.rome753.fullstack.main;
 
-import android.content.Intent;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
+import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import butterknife.BindView;
+import butterknife.OnClick;
+import cc.rome753.fullstack.BaseFragment;
+import cc.rome753.fullstack.R;
+import cc.rome753.fullstack.Utils;
 import cc.rome753.fullstack.event.WsCloseEvent;
 import cc.rome753.fullstack.event.WsFailureEvent;
 import cc.rome753.fullstack.event.WsMsg2AllEvent;
 import cc.rome753.fullstack.event.WsOpenEvent;
 import cc.rome753.fullstack.manager.ChatManager;
 
-
-public class ChatroomActivity extends BaseActivity {
-
-    public static void start(BaseActivity activity) {
-        Intent i = new Intent(activity, ChatroomActivity.class);
-        activity.startActivity(i);
-    }
+/**
+ * Created by crc on 16/11/30.
+ */
+public class ChatFragment extends BaseFragment {
 
     @BindView(R.id.tv)
     TextView mTv;
@@ -34,11 +33,29 @@ public class ChatroomActivity extends BaseActivity {
     ScrollView mSv;
     @BindView(R.id.et)
     EditText mEt;
+    @BindView(R.id.btn)
+    Button mBtn;
 
-    NotificationManagerCompat manager;
+    public static ChatFragment newInstance() {
+        Bundle args = new Bundle();
 
+        ChatFragment fragment = new ChatFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
 
-    public void onClick(View v) {
+    @Override
+    public int setView() {
+        return R.layout.fragment_chat;
+    }
+
+    @Override
+    public void initView() {
+        ChatManager.connect();
+    }
+
+    @OnClick(R.id.btn)
+    public void sendMsg() {
         String msg = mEt.getText().toString().trim();
         if (ChatManager.send2All(msg)) {
             mEt.setText("");
@@ -47,12 +64,12 @@ public class ChatroomActivity extends BaseActivity {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onWebSocketOpenEvent(WsOpenEvent event) {
-        Toast.makeText(this, "open", Toast.LENGTH_SHORT).show();
+        Utils.toast("open");
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onWebSocketCloseEvent(WsCloseEvent event) {
-        Toast.makeText(this, "Close", Toast.LENGTH_SHORT).show();
+        Utils.toast("close");
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -70,41 +87,16 @@ public class ChatroomActivity extends BaseActivity {
         }
     }
 
-    public void showNotice(String msg) {
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
-        builder.setTicker(msg);
-        builder.setSmallIcon(android.R.drawable.ic_menu_send);
-        builder.setContentTitle(msg);
-        builder.setContentText(msg);
-        builder.setOngoing(false);
-
-        manager.notify(0, builder.build());
-    }
-
     @Override
-    protected void onStart() {
+    public void onStart() {
         super.onStart();
         EventBus.getDefault().register(this);
     }
 
     @Override
-    protected void onStop() {
+    public void onStop() {
         EventBus.getDefault().unregister(this);
-        super.onPause();
+        super.onStop();
     }
 
-    @Override
-    public int setView() {
-        return R.layout.activity_chatroom;
-    }
-
-    @Override
-    public void initData() {
-
-    }
-
-    @Override
-    public void initView() {
-        ChatManager.connect();
-    }
 }

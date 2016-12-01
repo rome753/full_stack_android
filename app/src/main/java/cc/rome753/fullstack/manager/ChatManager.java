@@ -1,4 +1,4 @@
-package cc.rome753.fullstack;
+package cc.rome753.fullstack.manager;
 
 import android.util.Log;
 
@@ -10,11 +10,11 @@ import java.io.IOException;
 
 import cc.rome753.fullstack.bean.ChatMsg;
 import cc.rome753.fullstack.bean.ChatSend;
-import cc.rome753.fullstack.evnet.WsCloseEvent;
-import cc.rome753.fullstack.evnet.WsFailureEvent;
-import cc.rome753.fullstack.evnet.WsMsg2AllEvent;
-import cc.rome753.fullstack.evnet.WsMsg2MeEvent;
-import cc.rome753.fullstack.evnet.WsOpenEvent;
+import cc.rome753.fullstack.event.WsCloseEvent;
+import cc.rome753.fullstack.event.WsFailureEvent;
+import cc.rome753.fullstack.event.WsMsg2AllEvent;
+import cc.rome753.fullstack.event.WsMsg2MeEvent;
+import cc.rome753.fullstack.event.WsOpenEvent;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;

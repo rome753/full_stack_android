@@ -15,6 +15,9 @@ public abstract class BaseActivity extends AppCompatActivity {
     public abstract void initData();
     public abstract void initView();
 
+    // add for MainActivity
+    protected void initFragmentNavigator(Bundle savedInstanceState){}
+
     protected BaseActivity mActivity;
 
     protected AlertDialog mWaitDialog;
@@ -28,6 +31,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         mActivity = this;
 
         initData();
+        initFragmentNavigator(savedInstanceState);
         initView();
 
         mWaitDialog = new AlertDialog.Builder(this)
