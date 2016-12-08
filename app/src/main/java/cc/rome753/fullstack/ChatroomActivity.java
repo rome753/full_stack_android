@@ -1,6 +1,7 @@
 package cc.rome753.fullstack;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.view.View;
@@ -37,6 +38,15 @@ public class ChatroomActivity extends BaseActivity {
 
     NotificationManagerCompat manager;
 
+    @Override
+    public int setView() {
+        return R.layout.activity_chatroom;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
 
     public void onClick(View v) {
         String msg = mEt.getText().toString().trim();
@@ -93,18 +103,5 @@ public class ChatroomActivity extends BaseActivity {
         super.onPause();
     }
 
-    @Override
-    public int setView() {
-        return R.layout.activity_chatroom;
-    }
 
-    @Override
-    public void initData() {
-
-    }
-
-    @Override
-    public void initView() {
-        ChatManager.connect();
-    }
 }

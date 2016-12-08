@@ -1,7 +1,10 @@
 package cc.rome753.fullstack.main;
 
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ScrollView;
@@ -12,14 +15,11 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
 import butterknife.OnClick;
 import cc.rome753.fullstack.BaseFragment;
 import cc.rome753.fullstack.R;
-import cc.rome753.fullstack.Utils;
-import cc.rome753.fullstack.event.WsCloseEvent;
-import cc.rome753.fullstack.event.WsFailureEvent;
 import cc.rome753.fullstack.event.WsMsg2AllEvent;
-import cc.rome753.fullstack.event.WsOpenEvent;
 import cc.rome753.fullstack.manager.ChatManager;
 
 /**
@@ -44,14 +44,13 @@ public class ChatFragment extends BaseFragment {
         return fragment;
     }
 
+    @Nullable
     @Override
-    public int setView() {
-        return R.layout.fragment_chat;
-    }
-
-    @Override
-    public void initView() {
-        ChatManager.connect();
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_chat, container, false);
+        ButterKnife.bind(this, view);
+        ChatManager.open();
+        return view;
     }
 
     @OnClick(R.id.btn)
@@ -63,27 +62,10 @@ public class ChatFragment extends BaseFragment {
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onWebSocketOpenEvent(WsOpenEvent event) {
-        Utils.toast("open");
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onWebSocketCloseEvent(WsCloseEvent event) {
-        Utils.toast("close");
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onWsMsg2AllEvent(WsMsg2AllEvent event) {
         if (mTv != null) {
             mTv.append(event.from + "说：" + event.msg + "\n");
             mSv.fullScroll(View.FOCUS_DOWN);
-        }
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onWebSocketFailureEvent(WsFailureEvent event) {
-        if (mEt != null) {
-            mEt.setText(event.getMessage());
         }
     }
 

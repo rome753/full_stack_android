@@ -54,8 +54,8 @@ public class CookieManager implements CookieJar{
         if(Utils.isEmpty(cookies)) return;
         sUrlCookiesMap.put(SP_COOKIES_NAME, cookies);
         for(Cookie c : cookies){//从cookie中获取id和name保存到User类中
-            if("fsid".equals(c.name())) User.getUser().setId(c.value());
-            if("fsname".equals(c.name())) User.getUser().setName(c.value());
+            if("fsid".equals(c.name())) UserManager.getUser().setId(c.value());
+            if("fsname".equals(c.name())) UserManager.getUser().setName(c.value());
         }
         String json = new Gson().toJson(cookies);
         sPrefs.edit().putString(SP_COOKIES_NAME, json).apply();

@@ -1,16 +1,26 @@
 package cc.rome753.fullstack.main;
 
 import android.content.Intent;
+import android.graphics.drawable.LevelListDrawable;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.v4.app.Fragment;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import com.roughike.bottombar.BottomBar;
 import com.roughike.bottombar.OnTabSelectListener;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import butterknife.BindView;
 import cc.rome753.fullstack.BaseActivity;
 import cc.rome753.fullstack.R;
+import cc.rome753.fullstack.Utils;
+import cc.rome753.fullstack.event.WsFailureEvent;
+import cc.rome753.fullstack.event.WsOpenEvent;
 
 public class MainActivity extends BaseActivity {
 
@@ -24,10 +34,17 @@ public class MainActivity extends BaseActivity {
     private static final String TAG_FIND_FRAGMENT = "find-fragment";
     private static final String TAG_USER_FRAGMENT = "user-fragment";
 
+    //管理底部tab按钮
     @BindView(R.id.bottombar)
     BottomBar mBottombar;
 
+    //管理主页的fragment
     private FragmentNavigator mNavigator;
+
+    //actionbar上显示是否在线(websocket连接状态)
+    private static MenuItem mOnlineMenu;
+
+    private LevelListDrawable mOnlineDrawable;
 
     @Override
     public int setView() {
@@ -35,7 +52,9 @@ public class MainActivity extends BaseActivity {
     }
 
     @Override
-    public void initData() {
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
         mNavigator = new FragmentNavigator(getSupportFragmentManager(), new FragmentNavigatorAdapter() {
 
             @Override
@@ -71,15 +90,8 @@ public class MainActivity extends BaseActivity {
 
         }, R.id.contentContainer);
         mNavigator.setDefaultPosition(0);
-    }
+        initFragmentNavigator(savedInstanceState);
 
-    @Override
-    protected void initFragmentNavigator(Bundle savedInstanceState) {
-        mNavigator.onCreate(savedInstanceState);
-    }
-
-    @Override
-    public void initView() {
         mBottombar.setOnTabSelectListener(new OnTabSelectListener() {
             @Override
             public void onTabSelected(@IdRes int tabId) {
@@ -97,7 +109,49 @@ public class MainActivity extends BaseActivity {
             }
         });
 
+    }
 
+    @Override
+    protected void initFragmentNavigator(Bundle savedInstanceState) {
+        mNavigator.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        mOnlineMenu = menu.findItem(R.id.action_online);
+        mOnlineDrawable = (LevelListDrawable) mOnlineMenu.getIcon();
+        return true;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onWebSocketOpenEvent(WsOpenEvent event) {
+        mOnlineDrawable.setLevel(10);
+        Utils.toast("聊天连接成功");
+    }
+
+//    @Subscribe(threadMode = ThreadMode.MAIN)
+//    public void onWebSocketCloseEvent(WsCloseEvent event) {
+//        mOnlineMenu.setChecked(false);
+//        Utils.toast("聊天断开");
+//    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onWebSocketFailureEvent(WsFailureEvent event) {
+        mOnlineDrawable.setLevel(1);
+        Utils.toast("聊天连接断开: " + event.getMessage());
     }
 
 }

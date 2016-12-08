@@ -2,18 +2,72 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="vertical"
               android:background="#4fe"
+              android:padding="10dp"
               android:layout_width="match_parent"
               android:layout_height="match_parent">
 
-    <ImageView
-        android:id="@+id/iv_avatar"
-        android:layout_width="100dp"
-        android:layout_height="100dp"/>
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipe"
+        android:layout_width="match_parent"
+        android:layout_weight="1"
+        android:layout_height="0dp">
 
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/iv_avatar"
+                android:src="@drawable/ic_launcher"
+                android:layout_width="100dp"
+                android:layout_height="100dp"/>
+
+            <TextView
+                android:id="@+id/tv_name"
+                android:gravity="center"
+                android:text="姓名"
+                android:drawableLeft="@drawable/ic_launcher"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/tv_age"
+                android:gravity="center"
+                android:text="年龄"
+                android:drawableLeft="@drawable/ic_launcher"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/tv_city"
+                android:gravity="center"
+                android:text="城市"
+                android:drawableLeft="@drawable/ic_launcher"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/tv_quote"
+                android:gravity="center"
+                android:text="签名"
+                android:drawableLeft="@drawable/ic_launcher"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/tv_time"
+                android:gravity="center"
+                android:text="注册时间"
+                android:drawableLeft="@drawable/ic_launcher"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+    </android.support.v4.widget.SwipeRefreshLayout>
 
     <Button
         android:id="@+id/btn_logout"
-        android:text="logout"
+        android:text="退出登录"
+        android:textColor="@android:color/white"
+        android:background="@android:color/holo_red_light"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
+
 </LinearLayout>

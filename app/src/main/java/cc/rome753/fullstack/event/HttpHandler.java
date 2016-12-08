@@ -15,8 +15,16 @@ import okhttp3.Response;
 
 public abstract class HttpHandler implements Callback {
 
+    /**
+     * 调用者json返回信息或reason字符串
+     * @param response json返回信息或reason字符串
+     */
     public abstract void onSuccess(String response);
-    public abstract void onFailure(String reason);
+
+    /**
+     * 通知调用者失败, 不传递信息
+     */
+    public abstract void onFailure();
 
     @Override
     public void onFailure(Call call,final IOException e) {
@@ -30,21 +38,27 @@ public abstract class HttpHandler implements Callback {
             try {
                 String s = response.body().string();
                 Base b = Utils.decode(s, Base.class);
-                if(b == null) return;
-                final String uft8 = new String(b.reason.getBytes(), "utf-8");
+                final String reason = new String(b.reason.getBytes(), "utf-8");
                 final int error_code = b.error_code;
-                if(error_code >= 200 && error_code < 300){
-                    handleSuccess(uft8);
-                }else {
-                    handleFailure(uft8);
+                switch (error_code){
+                    case 200: // 无返回数据, 只有reason
+                        handleSuccess(reason);
+                        break;
+                    case 201: // 有返回数据
+                        handleSuccess(s);
+                        break;
+                    default:
+                        handleFailure(reason);
+                        break;
                 }
             } catch (IOException e) {
                 e.printStackTrace();
+                handleFailure("请求失败: " + e.getMessage());
             } finally {
                 response.close();
             }
         }else{
-            handleFailure(response.code() + "");
+            handleFailure("请求失败: " + response.code());
         }
     }
 
@@ -52,7 +66,8 @@ public abstract class HttpHandler implements Callback {
         App.sHandler.post(new Runnable() {
             @Override
             public void run() {
-                onFailure(reason);
+                Utils.toast(reason);
+                onFailure();
             }
         });
     }

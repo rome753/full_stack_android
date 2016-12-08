@@ -1,11 +1,14 @@
 package cc.rome753.fullstack;
 
+import android.util.Pair;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +31,23 @@ public class Utils {
         Type type = new ListParameterizedType(clazz);
         List<T> result =  new Gson().fromJson(json, type);
         return result;
+    }
+
+    public static String getUrlStr(List<Pair<String,String>> list){
+        if(isEmpty(list)) return "";
+
+        StringBuilder sb = new StringBuilder();
+        for(Pair<String, String> pair : list){
+            try {
+                if(sb.length() > 0) sb.append("&");
+                sb.append(URLEncoder.encode(pair.first,"utf-8"));
+                sb.append("=");
+                sb.append(URLEncoder.encode(pair.second,"utf-8"));
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
+        return "?" + sb.toString();
     }
 
     public static <T> boolean isEmpty(List<T> list){

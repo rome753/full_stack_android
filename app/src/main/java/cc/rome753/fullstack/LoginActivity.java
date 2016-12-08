@@ -1,6 +1,7 @@
 package cc.rome753.fullstack;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
@@ -15,7 +16,7 @@ import cc.rome753.fullstack.bean.Register;
 import cc.rome753.fullstack.event.HttpHandler;
 import cc.rome753.fullstack.main.MainActivity;
 import cc.rome753.fullstack.manager.OkhttpManager;
-import cc.rome753.fullstack.manager.User;
+import cc.rome753.fullstack.manager.UserManager;
 
 
 /**
@@ -24,7 +25,8 @@ import cc.rome753.fullstack.manager.User;
 public class LoginActivity extends BaseActivity {
 
     public static void start(BaseActivity activity){
-        activity.startActivity(new Intent(activity, LoginActivity.class));
+        Intent i = new Intent(activity, LoginActivity.class);
+        activity.startActivity(i);
     }
 
     @BindView(R.id.et_username)
@@ -41,6 +43,16 @@ public class LoginActivity extends BaseActivity {
 
     @BindView(R.id.btn_switch)
     Button mBtnSwitch;
+
+    @Override
+    public int setView() {
+        return R.layout.activity_login;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
 
     @OnClick(R.id.btn_register)
     void register(){
@@ -62,9 +74,7 @@ public class LoginActivity extends BaseActivity {
             }
 
             @Override
-            public void onFailure(String reason) {
-                Utils.toast(reason);
-
+            public void onFailure() {
             }
         });
     }
@@ -86,23 +96,20 @@ public class LoginActivity extends BaseActivity {
             public void onSuccess(String response) {
                 mWaitDialog.hide();
                 Utils.toast(response);
-                User.getUser().setName(u);
+                UserManager.getUser().setName(u);
                 MainActivity.start(mActivity);
                 finish();
             }
 
             @Override
-            public void onFailure(String reason) {
+            public void onFailure() {
                 mWaitDialog.hide();
-                Utils.toast(reason);
-
             }
         });
     }
 
-
     @OnClick(R.id.btn_switch)
-    void switchs(){
+    void switches(){
         String toLogin = getString(R.string.to_login);
         String toRegister = getString(R.string.to_register);
         boolean isLogin = mBtnSwitch.getText().toString().equals(toRegister);
@@ -113,19 +120,5 @@ public class LoginActivity extends BaseActivity {
         mBtnLogin.setVisibility(isLogin ? View.GONE : View.VISIBLE);
     }
 
-
-    @Override
-    public int setView() {
-        return R.layout.activity_login;
-    }
-
-    @Override
-    public void initData() {
-    }
-
-    @Override
-    public void initView() {
-
-    }
 }
 

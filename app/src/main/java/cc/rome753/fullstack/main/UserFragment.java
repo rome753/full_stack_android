@@ -1,64 +1,45 @@
 package cc.rome753.fullstack.main;
 
-import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.text.TextUtils;
+import android.util.Pair;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 
-import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
 import butterknife.OnClick;
 import cc.rome753.fullstack.BaseFragment;
+import cc.rome753.fullstack.ImageActivity;
 import cc.rome753.fullstack.LoginActivity;
 import cc.rome753.fullstack.R;
+import cc.rome753.fullstack.UserEditActivity;
 import cc.rome753.fullstack.Utils;
+import cc.rome753.fullstack.bean.User;
 import cc.rome753.fullstack.event.HttpHandler;
+import cc.rome753.fullstack.manager.ChatManager;
 import cc.rome753.fullstack.manager.OkhttpManager;
-import cc.rome753.fullstack.manager.User;
+import cc.rome753.fullstack.manager.UserManager;
 
 /**
  * Created by crc on 16/11/30.
  */
 
 public class UserFragment extends BaseFragment {
-
-    @BindView(R.id.iv_avatar)
-    ImageView ivAvatar;
-
-    @OnClick(R.id.iv_avatar)
-    void uploadAvatar(){
-        OkhttpManager.upload("avatar", new File("/storage/sdcard1/playground.png"), new HttpHandler() {
-            @Override
-            public void onSuccess(String response) {
-                Utils.toast(response);
-            }
-
-            @Override
-            public void onFailure(String reason) {
-                Utils.toast(reason);
-            }
-        });
-    }
-
-    @OnClick(R.id.btn_logout)
-    void logout(){
-        OkhttpManager.get("logout", null, new HttpHandler() {
-            @Override
-            public void onSuccess(String response) {
-                Utils.toast(response);
-                User.getUser().logout();
-                LoginActivity.start(mActivity);
-                mActivity.finish();
-            }
-
-            @Override
-            public void onFailure(String reason) {
-                Utils.toast(reason);
-            }
-        });
-    }
 
     public static UserFragment newInstance() {
         Bundle args = new Bundle();
@@ -68,14 +49,111 @@ public class UserFragment extends BaseFragment {
         return fragment;
     }
 
+    @BindView(R.id.iv_avatar)
+    ImageView ivAvatar;
+    @BindView(R.id.tv_name)
+    TextView tvName;
+    @BindView(R.id.tv_age)
+    TextView tvAge;
+    @BindView(R.id.tv_city)
+    TextView tvCity;
+    @BindView(R.id.tv_quote)
+    TextView tvQuote;
+    @BindView(R.id.tv_time)
+    TextView tvTime;
+    @BindView(R.id.btn_logout)
+    Button btnLogout;
+    @BindView(R.id.swipe)
+    SwipeRefreshLayout swipe;
 
-    @Override
-    public int setView() {
-        return R.layout.fragment_user;
+    private User mUser;
+
+    @OnClick(R.id.iv_avatar)
+    void showAvatar() {
+        ImageActivity.start(mActivity, mUser.avatar);
+    }
+
+    @OnClick(R.id.btn_logout)
+    void logout() {
+        String url = "logout";
+        OkhttpManager.get(url, new HttpHandler() {
+            @Override
+            public void onSuccess(String response) {
+                Utils.toast(response);
+                UserManager.getUser().logout();
+                ChatManager.close();
+                LoginActivity.start(mActivity);
+                mActivity.finish();
+            }
+
+            @Override
+            public void onFailure() {
+            }
+        });
     }
 
     @Override
-    public void initView() {
-        Glide.with(mActivity).load(Uri.parse("http://imgsrc.baidu.com/forum/pic/item/ae366e061d950a7b21eb6dba0dd162d9f3d3c9b4.jpg")).into(ivAvatar);
+    public void onStart() {
+        super.onStart();
+        requestUser();
     }
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_user, container, false);
+        ButterKnife.bind(this, view);
+        swipe.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                requestUser();
+            }
+        });
+        return view;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        menu.findItem(R.id.action_edit).setVisible(true);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId() == R.id.action_edit){
+            UserEditActivity.start(mActivity);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void requestUser(){
+        swipe.setRefreshing(true);
+        List<Pair<String, String>> list = new ArrayList<>();
+        list.add(new Pair<>("name", UserManager.getUser().getName()));
+        String url = "user" + Utils.getUrlStr(list);
+        OkhttpManager.get(url, new HttpHandler() {
+            @Override
+            public void onSuccess(String response) {
+                swipe.setRefreshing(false);
+                mUser = Utils.decode(response, User.class);
+                if(mUser == null) return;
+
+                if(!TextUtils.isEmpty(mUser.avatar)) {
+                    Glide.with(mActivity).load("http://" + mUser.avatar).into(ivAvatar);
+                }
+
+                tvName.setText("姓名: " + mUser.name);
+                tvAge.setText("年龄: " + mUser.age);
+                tvCity.setText("城市: " + mUser.city);
+                tvQuote.setText("签名: " + mUser.quote);
+                tvTime.setText("注册时间: " + mUser.register_time);
+            }
+
+            @Override
+            public void onFailure() {
+                swipe.setRefreshing(false);
+            }
+        });
+    }
+
 }

@@ -2,14 +2,17 @@
 <tabs>
     <tab
         id="@+id/tab_chat"
-        icon="@drawable/ic_launcher"
-        title="Chat" />
+        icon="@drawable/ic_menu_start_conversation"
+        title="聊天"
+        barColorWhenSelected="#aa5522" />
     <tab
         id="@+id/tab_find"
-        icon="@drawable/ic_launcher"
-        title="Find" />
+        icon="@drawable/ic_menu_search"
+        title="查找"
+        barColorWhenSelected="#994411" />
     <tab
         id="@+id/tab_user"
-        icon="@drawable/ic_launcher"
-        title="User" />
+        icon="@drawable/ic_menu_emoticons"
+        title="我"
+        barColorWhenSelected="#883300" />
 </tabs>
