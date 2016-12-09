@@ -21,6 +21,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import cc.rome753.fullstack.BaseFragment;
 import cc.rome753.fullstack.R;
+import cc.rome753.fullstack.Utils;
 import cc.rome753.fullstack.event.WsMsg2AllEvent;
 import cc.rome753.fullstack.manager.ChatManager;
 
@@ -86,6 +87,13 @@ public class ChatFragment extends BaseFragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         //menu状态被重置, 需要刷新
         MainActivity.setOnlineDrawable();
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        if(hidden){
+            Utils.hideKeyboard(mActivity, mEt);
+        }
     }
 
 }

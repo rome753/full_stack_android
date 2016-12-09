@@ -86,6 +86,8 @@ public class ImageActivity extends BaseActivity {
                 Bitmap bitmap = BitmapFactory.decodeStream(cr.openInputStream(uri));
                 // 获取缩略图-压缩大小
                 Bitmap thumbnail = ThumbnailUtils.extractThumbnail(bitmap, 500, 500);
+                mPhotoView.setImageBitmap(thumbnail);
+
                 // 保存到本地-压缩质量
                 String path = Utils.saveBitmap(thumbnail);
                 // 上传头像
@@ -99,8 +101,6 @@ public class ImageActivity extends BaseActivity {
                     public void onFailure() {
                     }
                 });
-                mPhotoView.setImageBitmap(thumbnail);
-//                Glide.with(mActivity).load(thumbnail).into(mPhotoView);
             } catch (Exception e) {
                 Log.e("Exception", e.getMessage(),e);
             }

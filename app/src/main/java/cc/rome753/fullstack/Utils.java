@@ -1,7 +1,10 @@
 package cc.rome753.fullstack;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.Pair;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -120,5 +123,10 @@ public class Utils {
     public static int sp2px(float spValue) {
         final float fontScale = sContext.getResources().getDisplayMetrics().scaledDensity;
         return (int) (spValue * fontScale + 0.5f);
+    }
+
+    public static void hideKeyboard(BaseActivity activity, View view){
+        InputMethodManager manager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+        manager.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
     }
 }

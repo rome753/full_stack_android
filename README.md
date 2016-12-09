@@ -7,11 +7,21 @@
 
 ## 架构
 使用一些通用、高效的框架
-- [okhttp]：com.squareup.okhttp3:okhttp:3.4.2
-- [okhttp-ws]：com.squareup.okhttp3:okhttp-ws:3.4.2
-- [eventbus]：org.greenrobot:eventbus:3.0.0
-- [gson]：com.google.code.gson:gson:2.8.0
-- [butterknife]:
+
+- compile 'com.android.support:appcompat-v7:24.2.1'
+- compile 'com.squareup.okhttp3:okhttp:3.4.2'
+- compile 'com.squareup.okhttp3:okhttp-ws:3.4.2'
+- compile 'com.squareup.okio:okio:1.11.0'
+- compile 'org.greenrobot:eventbus:3.0.0'
+- compile 'com.google.code.gson:gson:2.8.0'
+- compile 'com.android.support:design:24.2.1'
+- compile 'com.jakewharton:butterknife:8.4.0'
+- annotationProcessor 'com.jakewharton:butterknife-compiler:8.4
+- compile 'com.roughike:bottom-bar:2.0
+- compile 'com.github.bumptech.glide:glide:3.7.0'
+- compile 'com.github.bumptech.glide:okhttp3-integration:1.4.0@aar'
+
+- compile 'com.github.chrisbanes:PhotoView:1.3.1'
 
 ## 功能（~~已实现标记~~）
 - ~~注册~~
@@ -21,13 +31,13 @@
 > 验证用户名和密码，登录成功后保存用户名
 
 - ~~即时聊天~~
-> 使用okhttp-ws的websocket长连接实现。
+> 使用okhttp-ws的websocket长连接实现
 
 - 邮箱验证码
 - 数据库
 - 通知栏消息
 - **两人聊天**
-- **个人信息页面（头像）**
+- ~~个人信息页面（头像）~~
 - **获取历史聊天记录**
 - **发送图片**
 - 第三方登录
