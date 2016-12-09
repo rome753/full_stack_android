@@ -32,6 +32,7 @@ import cc.rome753.fullstack.Utils;
 import cc.rome753.fullstack.bean.User;
 import cc.rome753.fullstack.event.HttpHandler;
 import cc.rome753.fullstack.manager.ChatManager;
+import cc.rome753.fullstack.manager.GlideRoundTransform;
 import cc.rome753.fullstack.manager.OkhttpManager;
 import cc.rome753.fullstack.manager.UserManager;
 
@@ -115,6 +116,8 @@ public class UserFragment extends BaseFragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         menu.findItem(R.id.action_edit).setVisible(true);
+        //menu状态被重置, 需要刷新
+        MainActivity.setOnlineDrawable();
     }
 
     @Override
@@ -139,7 +142,9 @@ public class UserFragment extends BaseFragment {
                 if(mUser == null) return;
 
                 if(!TextUtils.isEmpty(mUser.avatar)) {
-                    Glide.with(mActivity).load("http://" + mUser.avatar).into(ivAvatar);
+                    int radius = Utils.dp2px(50);
+                    Glide.with(mActivity).load(mUser.avatar)
+                            .transform(new GlideRoundTransform(mActivity, radius)).into(ivAvatar);
                 }
 
                 tvName.setText("姓名: " + mUser.name);

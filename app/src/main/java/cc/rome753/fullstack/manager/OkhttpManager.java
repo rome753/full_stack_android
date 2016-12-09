@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 
+import cc.rome753.fullstack.App;
 import cc.rome753.fullstack.event.HttpHandler;
 import okhttp3.Call;
 import okhttp3.MediaType;
@@ -21,11 +22,22 @@ public class OkhttpManager {
 
     private OkhttpManager(){}
 
-//    public static final String HOST = "www.rome753.cc/";
-//    public static final String HOST = "192.168.31.247:8000/";
-    public static final String HOST = "192.168.1.28:8000/";
+    private static String HOST = App.sContext.getSharedPreferences("config", 0)
+            .getString("host", "www.rome753.cc/");
 
-    private final static String url_prefix="http://" + HOST;
+    private static String SCHEME="http://";
+
+    public static void setHost(String host){
+        if(!HOST.equals(host)){
+            HOST = host;
+            App.sContext.getSharedPreferences("config", 0)
+                    .edit().putString("host", HOST).apply();
+        }
+    }
+
+    public static String getHost(){
+        return HOST;
+    }
 
     private static class Holder{
         static final OkHttpClient sClient = new OkHttpClient.Builder()
@@ -40,23 +52,23 @@ public class OkhttpManager {
         return Holder.sClient;
     }
 
-    public static void get(String url, HttpHandler handler){
-        String finalUrl = url_prefix + url;
+    public static void get(String path, HttpHandler handler){
+        String finalUrl = SCHEME + HOST + path;
         Request request = new Request.Builder().url(finalUrl).build();
         Call call = getClient().newCall(request);
         call.enqueue(handler);
     }
 
-    public static void post(String url, String json, HttpHandler handler){
-        String finalUrl = url_prefix + url;
+    public static void post(String path, String json, HttpHandler handler){
+        String finalUrl = SCHEME + HOST + path;
         RequestBody body = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), json);
         Request request = new Request.Builder().url(finalUrl).post(body).build();
         Call call = getClient().newCall(request);
         call.enqueue(handler);
     }
 
-    public static void upload(String url, @NonNull File file, HttpHandler handler){
-        String finalUrl = url_prefix + url;
+    public static void upload(String path, @NonNull File file, HttpHandler handler){
+        String finalUrl = SCHEME + HOST + path;
         RequestBody fileBody = MultipartBody.create(MediaType.parse("application/octet-stream"), file);
         RequestBody body = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM)

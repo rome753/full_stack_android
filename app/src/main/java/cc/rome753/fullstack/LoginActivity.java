@@ -3,6 +3,8 @@ package cc.rome753.fullstack;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -15,12 +17,13 @@ import cc.rome753.fullstack.bean.Login;
 import cc.rome753.fullstack.bean.Register;
 import cc.rome753.fullstack.event.HttpHandler;
 import cc.rome753.fullstack.main.MainActivity;
+import cc.rome753.fullstack.manager.ChatManager;
 import cc.rome753.fullstack.manager.OkhttpManager;
 import cc.rome753.fullstack.manager.UserManager;
 
 
 /**
- * A login screen that offers login via email/password.
+ * A host screen that offers host via email/password.
  */
 public class LoginActivity extends BaseActivity {
 
@@ -52,6 +55,20 @@ public class LoginActivity extends BaseActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        switches();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.host, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        //切换服务器
+        OkhttpManager.setHost(item.getTitle().toString());
+        return super.onOptionsItemSelected(item);
     }
 
     @OnClick(R.id.btn_register)
@@ -97,6 +114,7 @@ public class LoginActivity extends BaseActivity {
                 mWaitDialog.hide();
                 Utils.toast(response);
                 UserManager.getUser().setName(u);
+                ChatManager.open();
                 MainActivity.start(mActivity);
                 finish();
             }
@@ -114,6 +132,7 @@ public class LoginActivity extends BaseActivity {
         String toRegister = getString(R.string.to_register);
         boolean isLogin = mBtnSwitch.getText().toString().equals(toRegister);
 
+        setTitle(isLogin ? "注册" : "登录");
         mBtnSwitch.setText(isLogin ? toLogin : toRegister);
         mEtEmail.setVisibility(isLogin ? View.VISIBLE : View.GONE);
         mBtnRegister.setVisibility(isLogin ? View.VISIBLE : View.GONE);

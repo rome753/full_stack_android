@@ -1,18 +1,25 @@
 package cc.rome753.fullstack;
 
+import android.content.ContentResolver;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.ThumbnailUtils;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
+
+import java.io.File;
 
 import butterknife.BindView;
+import cc.rome753.fullstack.event.HttpHandler;
+import cc.rome753.fullstack.manager.OkhttpManager;
 import uk.co.senab.photoview.PhotoView;
-import uk.co.senab.photoview.PhotoViewAttacher;
 
 public class ImageActivity extends BaseActivity {
 
@@ -23,10 +30,9 @@ public class ImageActivity extends BaseActivity {
     }
 
     String mImageUrl;
-    PhotoViewAttacher mAttacher;
 
     @BindView(R.id.image)
-    PhotoView imageView;
+    PhotoView mPhotoView;
 
     @Override
     public int setView() {
@@ -40,27 +46,15 @@ public class ImageActivity extends BaseActivity {
         mActionBar.setDisplayHomeAsUpEnabled(true);
         mImageUrl = getIntent().getStringExtra("image_url");
 
-        mAttacher = new PhotoViewAttacher(imageView);
+        Glide.with(mActivity).load(mImageUrl).into(mPhotoView);
 
-        Glide.with(mActivity).load(mImageUrl)
-                .listener(new RequestListener<String, GlideDrawable>() {
-                    @Override
-                    public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
-                        return false;
-                    }
-
-                    @Override
-                    public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                        mAttacher.update();
-                        return false;
-                    }
-                })
-                .into(imageView);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
+        menu.findItem(R.id.action_online).setVisible(false);
+        menu.findItem(R.id.action_edit).setVisible(true);
         return true;
     }
 
@@ -73,7 +67,51 @@ public class ImageActivity extends BaseActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void selectImage() {
+    private static int REQUEST_GET_IMAGE = 1;
 
+    private void selectImage() {
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/*");
+        startActivityForResult(intent, REQUEST_GET_IMAGE);
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == REQUEST_GET_IMAGE && resultCode == RESULT_OK){
+            Uri uri = data.getData();
+            Log.e("uri", uri.toString());
+            ContentResolver cr = this.getContentResolver();
+            try {
+                Bitmap bitmap = BitmapFactory.decodeStream(cr.openInputStream(uri));
+                // 获取缩略图-压缩大小
+                Bitmap thumbnail = ThumbnailUtils.extractThumbnail(bitmap, 500, 500);
+                // 保存到本地-压缩质量
+                String path = Utils.saveBitmap(thumbnail);
+                // 上传头像
+                OkhttpManager.upload("avatar", new File(path), new HttpHandler() {
+                    @Override
+                    public void onSuccess(String response) {
+                        Utils.toast(response);
+                    }
+
+                    @Override
+                    public void onFailure() {
+                    }
+                });
+                mPhotoView.setImageBitmap(thumbnail);
+//                Glide.with(mActivity).load(thumbnail).into(mPhotoView);
+            } catch (Exception e) {
+                Log.e("Exception", e.getMessage(),e);
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        Log.e("test","scale: "+mPhotoView.getScale());
+        return super.dispatchTouchEvent(ev);
+    }
+
 }

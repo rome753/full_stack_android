@@ -47,7 +47,7 @@ public abstract class HttpHandler implements Callback {
                     case 201: // 有返回数据
                         handleSuccess(s);
                         break;
-                    default:
+                    default:// <200 失败, reason
                         handleFailure(reason);
                         break;
                 }

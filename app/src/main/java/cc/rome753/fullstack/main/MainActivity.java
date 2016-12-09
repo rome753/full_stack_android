@@ -1,12 +1,16 @@
 package cc.rome753.fullstack.main;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.drawable.LevelListDrawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.v4.app.Fragment;
 import android.view.Menu;
-import android.view.MenuItem;
 
 import com.roughike.bottombar.BottomBar;
 import com.roughike.bottombar.OnTabSelectListener;
@@ -21,6 +25,7 @@ import cc.rome753.fullstack.R;
 import cc.rome753.fullstack.Utils;
 import cc.rome753.fullstack.event.WsFailureEvent;
 import cc.rome753.fullstack.event.WsOpenEvent;
+import cc.rome753.fullstack.manager.ChatManager;
 
 public class MainActivity extends BaseActivity {
 
@@ -42,9 +47,9 @@ public class MainActivity extends BaseActivity {
     private FragmentNavigator mNavigator;
 
     //actionbar上显示是否在线(websocket连接状态)
-    private static MenuItem mOnlineMenu;
+    private static LevelListDrawable mOnlineDrawable;
 
-    private LevelListDrawable mOnlineDrawable;
+    private NetworkReceiver mNetworkReceiver;
 
     @Override
     public int setView() {
@@ -90,7 +95,7 @@ public class MainActivity extends BaseActivity {
 
         }, R.id.contentContainer);
         mNavigator.setDefaultPosition(0);
-        initFragmentNavigator(savedInstanceState);
+        mNavigator.onCreate(savedInstanceState);
 
         mBottombar.setOnTabSelectListener(new OnTabSelectListener() {
             @Override
@@ -109,19 +114,38 @@ public class MainActivity extends BaseActivity {
             }
         });
 
-    }
+        if(mNetworkReceiver == null){
+            mNetworkReceiver = new NetworkReceiver();
+        }
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(mNetworkReceiver, filter);
 
-    @Override
-    protected void initFragmentNavigator(Bundle savedInstanceState) {
-        mNavigator.onCreate(savedInstanceState);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
-        mOnlineMenu = menu.findItem(R.id.action_online);
-        mOnlineDrawable = (LevelListDrawable) mOnlineMenu.getIcon();
+        mOnlineDrawable = (LevelListDrawable) menu.findItem(R.id.action_online).getIcon();
         return true;
+    }
+
+    public static void setOnlineDrawable(){
+        boolean online = ChatManager.isOnline();
+        if(mOnlineDrawable != null) {
+            mOnlineDrawable.setLevel(online ? 10 : 1);
+        }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onWebSocketOpenEvent(WsOpenEvent event) {
+        setOnlineDrawable();
+        Utils.toast("聊天连接成功");
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onWebSocketFailureEvent(WsFailureEvent event) {
+        setOnlineDrawable();
+        Utils.toast("聊天连接断开: " + event.getMessage());
     }
 
     @Override
@@ -136,22 +160,24 @@ public class MainActivity extends BaseActivity {
         super.onStop();
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onWebSocketOpenEvent(WsOpenEvent event) {
-        mOnlineDrawable.setLevel(10);
-        Utils.toast("聊天连接成功");
+    @Override
+    protected void onDestroy() {
+        if(mNetworkReceiver != null){
+            unregisterReceiver(mNetworkReceiver);
+        }
+        super.onDestroy();
     }
 
-//    @Subscribe(threadMode = ThreadMode.MAIN)
-//    public void onWebSocketCloseEvent(WsCloseEvent event) {
-//        mOnlineMenu.setChecked(false);
-//        Utils.toast("聊天断开");
-//    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onWebSocketFailureEvent(WsFailureEvent event) {
-        mOnlineDrawable.setLevel(1);
-        Utils.toast("聊天连接断开: " + event.getMessage());
+    class NetworkReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo info = manager.getActiveNetworkInfo();
+            //网络连接上时开启聊天连接
+            if(info != null && info.isConnected()) {
+                ChatManager.open();
+            }
+        }
     }
 
 }

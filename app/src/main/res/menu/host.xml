@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_host0"
+        android:icon="@drawable/ic_menu_settings_holo_light"
+        android:title="www.rome753.cc/"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_host1"
+        android:icon="@drawable/ic_menu_settings_holo_light"
+        android:title="192.168.1.28:8000/"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_host2"
+        android:icon="@drawable/ic_menu_settings_holo_light"
+        android:title="192.168.31.247:8000/"
+        app:showAsAction="never"/>
+</menu>

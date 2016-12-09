@@ -33,22 +33,28 @@ public class ChatManager {
 
     private ChatManager(){}
 
-    final static String url="ws://"+OkhttpManager.HOST+"chat";
+    private static String SCHEME="http://";
+
+    public static String PATH = "chat";
 
     private static WebSocket mWebSocket;
+    private static boolean mIsOpening;
 
-    public static void open(){
+    synchronized public static void open(){
         if(mWebSocket != null) return;
+        if(mIsOpening) return;
+        mIsOpening = true;
         OkHttpClient client = OkhttpManager.getClient();
-        Request request = new Request.Builder().url(url).build();
+        Request request = new Request.Builder().url(SCHEME + OkhttpManager.getHost() + PATH).build();
         WebSocketCall webSocketCall = WebSocketCall.create(client, request);
         webSocketCall.enqueue(new WebSocketListener() {
 
             @Override
             public void onOpen(okhttp3.ws.WebSocket webSocket, Response response) {
                 Log.d("WebSocket", "onOpen");
-                EventBus.getDefault().post(new WsOpenEvent());
+                mIsOpening = false;
                 mWebSocket = webSocket;
+                EventBus.getDefault().post(new WsOpenEvent());
                 //注册fsid和name
                 String idName = UserManager.getUser().getId()+ UserManager.getUser().getName();
                 sendId(idName);
@@ -57,8 +63,9 @@ public class ChatManager {
             @Override
             public void onFailure(IOException e, Response response) {
                 Log.d("WebSocket","onFailure: "+e.getMessage());
-                EventBus.getDefault().post(new WsFailureEvent(e.getMessage()));
+                mIsOpening = false;
                 mWebSocket = null;
+                EventBus.getDefault().post(new WsFailureEvent(e.getMessage()));
             }
 
             @Override
@@ -94,8 +101,8 @@ public class ChatManager {
             @Override
             public void onClose(int code, String reason) {
                 Log.d("WebSocketCall","onClose: "+reason);
-//                EventBus.getDefault().post(new WsCloseEvent());
                 mWebSocket = null;
+//                EventBus.getDefault().post(new WsCloseEvent());
             }
         });
     }
@@ -103,7 +110,7 @@ public class ChatManager {
     public static void close(){
         if(mWebSocket != null){
             try {
-                mWebSocket.close(0, "主动关闭");
+                mWebSocket.close(1000, "主动关闭");
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -135,9 +142,15 @@ public class ChatManager {
                 e.printStackTrace();
             }
         }
-        //reconnect...
-        open();
         return false;
+    }
+
+    /**
+     * 聊天是否在线
+     * @return
+     */
+    public static boolean isOnline(){
+        return mWebSocket != null;
     }
 
 }
