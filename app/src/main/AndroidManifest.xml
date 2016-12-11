@@ -15,7 +15,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".ChatroomActivity"
+            android:name=".ChatActivity"
             android:windowSoftInputMode="stateHidden">
         </activity>
         <activity

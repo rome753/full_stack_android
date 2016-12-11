@@ -47,6 +47,11 @@ public abstract class BaseActivity extends AppCompatActivity {
                 .create();
     }
 
+    /**
+     * 左上角返回键finish页面
+     * @param item
+     * @return
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if(item.getItemId() == android.R.id.home){

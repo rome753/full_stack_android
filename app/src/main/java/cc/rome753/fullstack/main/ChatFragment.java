@@ -22,7 +22,7 @@ import butterknife.OnClick;
 import cc.rome753.fullstack.BaseFragment;
 import cc.rome753.fullstack.R;
 import cc.rome753.fullstack.Utils;
-import cc.rome753.fullstack.event.WsMsg2AllEvent;
+import cc.rome753.fullstack.event.WsMessageEvent;
 import cc.rome753.fullstack.manager.ChatManager;
 
 /**
@@ -39,12 +39,23 @@ public class ChatFragment extends BaseFragment {
     @BindView(R.id.btn)
     Button mBtn;
 
-    public static ChatFragment newInstance() {
-        Bundle args = new Bundle();
+    /**
+     * 对方用户名，""代表所有人
+     */
+    String mName;
 
+    public static ChatFragment newInstance(String name) {
+        Bundle args = new Bundle();
+        args.putString("name", name);
         ChatFragment fragment = new ChatFragment();
         fragment.setArguments(args);
         return fragment;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mName = getArguments().getString("name");
     }
 
     @Nullable
@@ -58,13 +69,25 @@ public class ChatFragment extends BaseFragment {
     @OnClick(R.id.btn)
     public void sendMsg() {
         String msg = mEt.getText().toString().trim();
-        if (ChatManager.send2All(msg)) {
+        boolean result;
+        switch (mName){
+            case ChatManager.ALL_NAME:
+                result = ChatManager.send2All(msg);
+                break;
+            case ChatManager.ROBOT_NAME:
+                result = ChatManager.send2Robot(msg);
+                break;
+            default:
+                result = ChatManager.send2User(mName, msg);
+                break;
+        }
+        if (result) {
             mEt.setText("");
         }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onWsMsg2AllEvent(WsMsg2AllEvent event) {
+    public void onWsMessageEvent(WsMessageEvent event) {
         if (mTv != null) {
             mTv.append(event.from + "说：" + event.msg + "\n");
             mSv.fullScroll(View.FOCUS_DOWN);

@@ -5,13 +5,13 @@ package cc.rome753.fullstack.event;
  */
 
 public class WsMessageEvent {
-    private String msg;
 
-    public String getMessage() {
-        return msg;
-    }
+    public String from;
 
-    public WsMessageEvent(String msg){
+    public String msg;
+
+    public WsMessageEvent(String from, String msg){
+        this.from = from;
         this.msg = msg;
     }
 }

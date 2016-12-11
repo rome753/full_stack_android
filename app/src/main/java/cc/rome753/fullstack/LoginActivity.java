@@ -88,6 +88,7 @@ public class LoginActivity extends BaseActivity {
             @Override
             public void onSuccess(String response) {
                 Utils.toast(response);
+                switches();
             }
 
             @Override

@@ -1,5 +1,7 @@
 package cc.rome753.fullstack.manager;
 
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -10,9 +12,10 @@ import java.io.IOException;
 
 import cc.rome753.fullstack.bean.ChatMsg;
 import cc.rome753.fullstack.bean.ChatSend;
+import cc.rome753.fullstack.event.WsComesEvent;
 import cc.rome753.fullstack.event.WsFailureEvent;
-import cc.rome753.fullstack.event.WsMsg2AllEvent;
-import cc.rome753.fullstack.event.WsMsg2MeEvent;
+import cc.rome753.fullstack.event.WsLeavesEvent;
+import cc.rome753.fullstack.event.WsMessageEvent;
 import cc.rome753.fullstack.event.WsOpenEvent;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -33,26 +36,47 @@ public class ChatManager {
 
     private ChatManager(){}
 
-    private static String SCHEME="http://";
+    public static final String ALL_NAME = "";
+    public static final String ROBOT_NAME = "lara";
+
+    private static String SCHEME="ws://";
 
     public static String PATH = "chat";
 
-    private static WebSocket mWebSocket;
-    private static boolean mIsOpening;
+    private static WebSocketCall mWebSocketCall;
 
-    synchronized public static void open(){
-        if(mWebSocket != null) return;
-        if(mIsOpening) return;
-        mIsOpening = true;
+    private static WebSocket mWebSocket;
+
+    private static Handler mHandler;
+
+    /**
+     * 打开聊天ws连接， 先过滤掉1s内的重复请求
+     */
+    public static void open(){
+        if(mWebSocket == null) {
+            if(mHandler == null) mHandler = new Handler(){
+                @Override
+                public void handleMessage(Message msg) {
+                    openChat();
+                }
+            };
+            mHandler.removeMessages(0);
+            Message message = Message.obtain();
+            message.what = 0;
+            mHandler.sendMessageDelayed(message, 1000);
+        }
+    }
+    private static void openChat(){
+        Log.d("WebSocket", "openChat");
         OkHttpClient client = OkhttpManager.getClient();
         Request request = new Request.Builder().url(SCHEME + OkhttpManager.getHost() + PATH).build();
-        WebSocketCall webSocketCall = WebSocketCall.create(client, request);
-        webSocketCall.enqueue(new WebSocketListener() {
+        if(mWebSocketCall != null) mWebSocketCall.cancel(); //取消上一个还没回调状态的请求
+        mWebSocketCall = WebSocketCall.create(client, request);
+        mWebSocketCall.enqueue(new WebSocketListener() {
 
             @Override
             public void onOpen(okhttp3.ws.WebSocket webSocket, Response response) {
                 Log.d("WebSocket", "onOpen");
-                mIsOpening = false;
                 mWebSocket = webSocket;
                 EventBus.getDefault().post(new WsOpenEvent());
                 //注册fsid和name
@@ -63,7 +87,6 @@ public class ChatManager {
             @Override
             public void onFailure(IOException e, Response response) {
                 Log.d("WebSocket","onFailure: "+e.getMessage());
-                mIsOpening = false;
                 mWebSocket = null;
                 EventBus.getDefault().post(new WsFailureEvent(e.getMessage()));
             }
@@ -76,14 +99,14 @@ public class ChatManager {
                     ChatMsg wsMsg = new Gson().fromJson(msg, ChatMsg.class);
                     switch (wsMsg.type){
                         case 0://to all
-                            EventBus.getDefault().post(new WsMsg2AllEvent(wsMsg.from, wsMsg.msg));
-                            break;
                         case 1://to me
-                            EventBus.getDefault().post(new WsMsg2MeEvent(wsMsg.msg));
+                            EventBus.getDefault().post(new WsMessageEvent(wsMsg.from, wsMsg.msg));
                             break;
-                        case 2:
+                        case 2:// comes
+                            EventBus.getDefault().post(new WsComesEvent(wsMsg.from));
                             break;
-                        case 3:
+                        case 3:// leaves
+                            EventBus.getDefault().post(new WsLeavesEvent(wsMsg.from));
                             break;
                     }
                 } else {
@@ -123,12 +146,17 @@ public class ChatManager {
     }
 
     public static boolean send2All(String msg){
-        ChatSend c = new ChatSend(1, "", msg);
+        ChatSend c = new ChatSend(1, ALL_NAME, msg);
         return send(c);
     }
 
     public static boolean send2User(String to, String msg){
         ChatSend c = new ChatSend(2, to, msg);
+        return send(c);
+    }
+
+    public static boolean send2Robot(String msg){
+        ChatSend c = new ChatSend(3, ROBOT_NAME, msg);
         return send(c);
     }
 
