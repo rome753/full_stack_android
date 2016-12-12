@@ -9,7 +9,7 @@
     <item
         android:id="@+id/action_host1"
         android:icon="@drawable/ic_menu_settings_holo_light"
-        android:title="192.168.1.28:8000/"
+        android:title="192.168.1.75:8000/"
         app:showAsAction="never"/>
     <item
         android:id="@+id/action_host2"

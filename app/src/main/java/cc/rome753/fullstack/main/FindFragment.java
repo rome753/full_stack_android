@@ -11,7 +11,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.greenrobot.eventbus.EventBus;
@@ -28,6 +28,7 @@ import cc.rome753.fullstack.ChatActivity;
 import cc.rome753.fullstack.R;
 import cc.rome753.fullstack.Utils;
 import cc.rome753.fullstack.bean.response.OnlineUsers;
+import cc.rome753.fullstack.callback.OnItemClickListener;
 import cc.rome753.fullstack.event.HttpHandler;
 import cc.rome753.fullstack.event.WsComesEvent;
 import cc.rome753.fullstack.event.WsLeavesEvent;
@@ -74,10 +75,11 @@ public class FindFragment extends BaseFragment {
         mRvUsers.setLayoutManager(new LinearLayoutManager(mActivity));
         mRvUsers.setItemAnimator(new DefaultItemAnimator());
         mRvUsers.addItemDecoration(new DividerItemDecoration(mActivity, DividerItemDecoration.VERTICAL_LIST));
-        mAdapter.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mAdapter.setOnItemClickListener(new OnItemClickListener() {
+
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String name = mUserList.get(position - 1);
+            public void onItemClick(int positon, Object data) {
+                String name = (String) data;
                 ChatActivity.start(mActivity, name);
             }
         });
@@ -152,9 +154,9 @@ public class FindFragment extends BaseFragment {
 
     class UserAdapter extends RecyclerView.Adapter{
 
-        private AdapterView.OnItemClickListener onItemClickListener;
+        private OnItemClickListener onItemClickListener;
 
-        void setOnItemClickListener(AdapterView.OnItemClickListener onItemClickListener){
+        void setOnItemClickListener(OnItemClickListener onItemClickListener){
             this.onItemClickListener = onItemClickListener;
         }
 
@@ -192,7 +194,7 @@ public class FindFragment extends BaseFragment {
         }
 
         @Override
-        public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
+        public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
             if(getItemViewType(position) == 0){
                 return;
             }
@@ -202,7 +204,7 @@ public class FindFragment extends BaseFragment {
                 @Override
                 public void onClick(View v) {
                     if(onItemClickListener != null){
-                        onItemClickListener.onItemClick(null, holder.itemView, holder.getAdapterPosition(), 0);
+                        onItemClickListener.onItemClick(holder.getAdapterPosition(), name);
                     }
                 }
             });
@@ -215,6 +217,8 @@ public class FindFragment extends BaseFragment {
 
         class HeaderViewHolder extends RecyclerView.ViewHolder{
 
+            @BindView(R.id.iv_avatar)
+            ImageView ivAvatar;
             @BindView(R.id.tv_name)
             TextView tvName;
 
@@ -226,6 +230,8 @@ public class FindFragment extends BaseFragment {
 
         class ItemViewHolder extends RecyclerView.ViewHolder{
 
+            @BindView(R.id.iv_avatar)
+            ImageView ivAvatar;
             @BindView(R.id.tv_name)
             TextView tvName;
             @BindView(R.id.container)
