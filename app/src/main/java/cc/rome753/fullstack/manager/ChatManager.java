@@ -1,6 +1,7 @@
 package cc.rome753.fullstack.manager;
 
 import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -8,6 +9,7 @@ import com.google.gson.Gson;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import cc.rome753.fullstack.bean.ChatMsg;
 import cc.rome753.fullstack.bean.ChatSend;
@@ -42,7 +44,7 @@ public class ChatManager {
 
     public static String PATH = "chat";
 
-    private static WebSocketCall mWebSocketCall;
+    private static OkHttpClient mOkhttpClient;
 
     private static WebSocket mWebSocket;
 
@@ -52,25 +54,33 @@ public class ChatManager {
      * 打开聊天ws连接， 先过滤掉1s内的重复请求
      */
     public static void open(){
-//        if(mWebSocket == null) {
-//            if(mHandler == null) mHandler = new Handler(){
-//                @Override
-//                public void handleMessage(Message msg) {
+        if(mWebSocket == null) {
+            if(mHandler == null) mHandler = new Handler(){
+                @Override
+                public void handleMessage(Message msg) {
                     openChat();
-//                }
-//            };
-//            mHandler.removeMessages(0);
-//            Message message = Message.obtain();
-//            message.what = 0;
-//            mHandler.sendMessageDelayed(message, 1000);
-//        }
+                }
+            };
+            mHandler.removeMessages(0);
+            Message message = Message.obtain();
+            message.what = 0;
+            mHandler.sendMessageDelayed(message, 1000);
+        }
     }
+
     private static void openChat(){
         Log.d("WebSocket", "openChat");
-        OkHttpClient client = OkhttpManager.getClient();
+        if(mOkhttpClient == null){
+            mOkhttpClient = new OkHttpClient.Builder()
+                    .readTimeout(0, TimeUnit.SECONDS)//长连接设置为无超时
+                    .writeTimeout(0, TimeUnit.SECONDS)//长连接设置为无超时
+                    .connectTimeout(1, TimeUnit.SECONDS)//重连的超时尽量短
+                    .cookieJar(new CookieManager())
+                    .build();
+        }
         Request request = new Request.Builder().url(SCHEME + OkhttpManager.getHost() + PATH).build();
-        mWebSocketCall = WebSocketCall.create(client, request);
-        mWebSocketCall.enqueue(new WebSocketListener() {
+        WebSocketCall webSocketCall = WebSocketCall.create(mOkhttpClient, request);
+        webSocketCall.enqueue(new WebSocketListener() {
 
             @Override
             public void onOpen(okhttp3.ws.WebSocket webSocket, Response response) {
@@ -84,7 +94,7 @@ public class ChatManager {
 
             @Override
             public void onFailure(IOException e, Response response) {
-                Log.d("WebSocket","onFailure: "+e.getMessage());
+                Log.d("WebSocket","onFailure: " + e);
                 mWebSocket = null;
                 EventBus.getDefault().post(new WsFailureEvent(e.getMessage()));
             }
@@ -99,6 +109,7 @@ public class ChatManager {
                         case 0://to all
                         case 1://to me
                             EventBus.getDefault().post(new WsMessageEvent(wsMsg.from, wsMsg.msg));
+                            NotificationUtils.showMsg(wsMsg.from, wsMsg.msg);
                             break;
                         case 2:// comes
                             EventBus.getDefault().post(new WsComesEvent(wsMsg.from, wsMsg.msg));

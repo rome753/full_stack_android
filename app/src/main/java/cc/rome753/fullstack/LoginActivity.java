@@ -113,7 +113,6 @@ public class LoginActivity extends BaseActivity {
             @Override
             public void onSuccess(String response) {
                 mWaitDialog.hide();
-                Utils.toast(response);
                 UserManager.getUser().setName(u);
                 ChatManager.open();
                 MainActivity.start(mActivity);
