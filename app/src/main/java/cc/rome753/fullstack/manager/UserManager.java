@@ -15,6 +15,7 @@ public class UserManager {
     
     private String id;
     private String name;
+    private String avatar;
     
     SharedPreferences mPrefs;
     
@@ -53,6 +54,19 @@ public class UserManager {
         }
         return name;
     }
+    
+    public void setAvatar(String avatar){
+        if(TextUtils.isEmpty(avatar)) return;
+        this.avatar = avatar;
+        getPrefs().edit().putString("avatar", avatar).apply();
+    }
+    
+    public String getAvatar(){
+        if(TextUtils.isEmpty(avatar)){
+            avatar = getPrefs().getString("avatar", "");
+        }
+        return avatar;
+    }
 
     private SharedPreferences getPrefs(){
         if(mPrefs == null)
@@ -63,6 +77,7 @@ public class UserManager {
     public void logout(){
         id = "";
         name = "";
+        avatar = "";
         getPrefs().edit().clear().apply();
         CookieManager.clear();
     }

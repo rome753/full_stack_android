@@ -2,11 +2,14 @@ package cc.rome753.fullstack;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.text.TextUtils;
 import android.util.Pair;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
 
 import java.io.File;
@@ -19,6 +22,8 @@ import java.lang.reflect.Type;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+
+import cc.rome753.fullstack.manager.GlideRoundTransform;
 
 import static cc.rome753.fullstack.App.sContext;
 
@@ -128,5 +133,14 @@ public class Utils {
     public static void hideKeyboard(BaseActivity activity, View view){
         InputMethodManager manager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
         manager.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+    }
+
+    public static void loadAvatar(Context context, String url, ImageView imageView, int radiusDp){
+        if(!TextUtils.isEmpty(url)){
+            int radius = Utils.dp2px(radiusDp);
+            Glide.with(context).load(url).transform(new GlideRoundTransform(context, radius))
+                    .into(imageView);
+
+        }
     }
 }

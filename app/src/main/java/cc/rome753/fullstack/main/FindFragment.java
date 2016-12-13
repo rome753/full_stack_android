@@ -27,6 +27,7 @@ import cc.rome753.fullstack.BaseFragment;
 import cc.rome753.fullstack.ChatActivity;
 import cc.rome753.fullstack.R;
 import cc.rome753.fullstack.Utils;
+import cc.rome753.fullstack.bean.User;
 import cc.rome753.fullstack.bean.response.OnlineUsers;
 import cc.rome753.fullstack.callback.OnItemClickListener;
 import cc.rome753.fullstack.event.HttpHandler;
@@ -53,7 +54,7 @@ public class FindFragment extends BaseFragment {
 
     View mHeaderView;
 
-    List<String> mUserList;
+    List<User> mUserList;
 
     public static FindFragment newInstance() {
         Bundle args = new Bundle();
@@ -79,8 +80,8 @@ public class FindFragment extends BaseFragment {
 
             @Override
             public void onItemClick(int positon, Object data) {
-                String name = (String) data;
-                ChatActivity.start(mActivity, name);
+                User user = (User) data;
+                ChatActivity.start(mActivity, user.name, user.avatar);
             }
         });
         mRvUsers.setAdapter(mAdapter);
@@ -93,11 +94,6 @@ public class FindFragment extends BaseFragment {
         });
 
         return view;
-    }
-
-    @Override
-    public void onHiddenChanged(boolean hidden) {
-        requestData();
     }
 
     protected void requestData(){
@@ -126,6 +122,7 @@ public class FindFragment extends BaseFragment {
     public void onStart() {
         super.onStart();
         EventBus.getDefault().register(this);
+        requestData();
     }
 
     @Override
@@ -136,9 +133,16 @@ public class FindFragment extends BaseFragment {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onWsComesEvent(WsComesEvent event) {
-        String name = event.name;
-        if(!mUserList.contains(name)){
-            mUserList.add(name);
+        User user = event.user;
+        boolean b = false;
+        for(User u : mUserList){
+            if(user.name.equals(u.name)){
+                b = true;
+                break;
+            }
+        }
+        if(!b){
+            mUserList.add(user);
             mAdapter.notifyDataSetChanged();
         }
     }
@@ -146,8 +150,15 @@ public class FindFragment extends BaseFragment {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onWsLeavesEvent(WsLeavesEvent event) {
         String name = event.name;
-        if(mUserList.contains(name)){
-            mUserList.remove(name);
+        int index = -1;
+        for(User u : mUserList){
+            if(name.equals(u.name)){
+                index = mUserList.indexOf(u);
+                break;
+            }
+        }
+        if(index != -1){
+            mUserList.remove(index);
             mAdapter.notifyDataSetChanged();
         }
     }
@@ -180,7 +191,7 @@ public class FindFragment extends BaseFragment {
                     mHeaderView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            ChatActivity.start(mActivity, ROBOT_NAME);
+                            ChatActivity.start(mActivity, ROBOT_NAME, "");
                         }
                     });
                 }
@@ -198,13 +209,14 @@ public class FindFragment extends BaseFragment {
             if(getItemViewType(position) == 0){
                 return;
             }
-            final String name = mUserList.get(position - 1);
-            ((ItemViewHolder)holder).tvName.setText(name);
+            final User user = mUserList.get(position - 1);
+            ((ItemViewHolder)holder).tvName.setText(user.name);
+            Utils.loadAvatar(mActivity, user.avatar, ((ItemViewHolder)holder).ivAvatar, 25);
             ((ItemViewHolder) holder).container.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if(onItemClickListener != null){
-                        onItemClickListener.onItemClick(holder.getAdapterPosition(), name);
+                        onItemClickListener.onItemClick(holder.getAdapterPosition(), user);
                     }
                 }
             });

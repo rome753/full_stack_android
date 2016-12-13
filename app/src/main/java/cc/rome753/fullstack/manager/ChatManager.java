@@ -1,7 +1,6 @@
 package cc.rome753.fullstack.manager;
 
 import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -53,24 +52,23 @@ public class ChatManager {
      * 打开聊天ws连接， 先过滤掉1s内的重复请求
      */
     public static void open(){
-        if(mWebSocket == null) {
-            if(mHandler == null) mHandler = new Handler(){
-                @Override
-                public void handleMessage(Message msg) {
+//        if(mWebSocket == null) {
+//            if(mHandler == null) mHandler = new Handler(){
+//                @Override
+//                public void handleMessage(Message msg) {
                     openChat();
-                }
-            };
-            mHandler.removeMessages(0);
-            Message message = Message.obtain();
-            message.what = 0;
-            mHandler.sendMessageDelayed(message, 1000);
-        }
+//                }
+//            };
+//            mHandler.removeMessages(0);
+//            Message message = Message.obtain();
+//            message.what = 0;
+//            mHandler.sendMessageDelayed(message, 1000);
+//        }
     }
     private static void openChat(){
         Log.d("WebSocket", "openChat");
         OkHttpClient client = OkhttpManager.getClient();
         Request request = new Request.Builder().url(SCHEME + OkhttpManager.getHost() + PATH).build();
-        if(mWebSocketCall != null) mWebSocketCall.cancel(); //取消上一个还没回调状态的请求
         mWebSocketCall = WebSocketCall.create(client, request);
         mWebSocketCall.enqueue(new WebSocketListener() {
 
@@ -103,7 +101,7 @@ public class ChatManager {
                             EventBus.getDefault().post(new WsMessageEvent(wsMsg.from, wsMsg.msg));
                             break;
                         case 2:// comes
-                            EventBus.getDefault().post(new WsComesEvent(wsMsg.from));
+                            EventBus.getDefault().post(new WsComesEvent(wsMsg.from, wsMsg.msg));
                             break;
                         case 3:// leaves
                             EventBus.getDefault().post(new WsLeavesEvent(wsMsg.from));

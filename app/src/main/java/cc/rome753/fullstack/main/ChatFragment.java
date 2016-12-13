@@ -27,12 +27,12 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import cc.rome753.fullstack.BaseFragment;
-import cc.rome753.fullstack.ChatActivity;
 import cc.rome753.fullstack.R;
 import cc.rome753.fullstack.Utils;
 import cc.rome753.fullstack.callback.OnItemClickListener;
 import cc.rome753.fullstack.event.WsMessageEvent;
 import cc.rome753.fullstack.manager.ChatManager;
+import cc.rome753.fullstack.manager.UserManager;
 
 /**
  * Created by crc on 16/11/30.
@@ -50,14 +50,16 @@ public class ChatFragment extends BaseFragment {
      * 对方用户名，""代表所有人
      */
     String mName;
-    
+    String mAvatar;
+
     ChatAdapter mAdapter;
     
     List<WsMessageEvent> mMsgList;
 
-    public static ChatFragment newInstance(String name) {
+    public static ChatFragment newInstance(String name, String avatar) {
         Bundle args = new Bundle();
         args.putString("name", name);
+        args.putString("avatar", avatar);
         ChatFragment fragment = new ChatFragment();
         fragment.setArguments(args);
         return fragment;
@@ -67,6 +69,7 @@ public class ChatFragment extends BaseFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mName = getArguments().getString("name");
+        mAvatar = getArguments().getString("avatar");
     }
 
     @Nullable
@@ -83,8 +86,6 @@ public class ChatFragment extends BaseFragment {
 
             @Override
             public void onItemClick(int positon, Object data) {
-                String name = (String) data;
-                ChatActivity.start(mActivity, name);
             }
         });
         mRvChat.setAdapter(mAdapter);
@@ -126,6 +127,14 @@ public class ChatFragment extends BaseFragment {
         public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
             final String msg = getItem(position).msg;
             ((ItemViewHolder)holder).tvMsg.setText(msg);
+
+            String avatarUrl = "";
+            if(getItemViewType(position) == 0){
+                avatarUrl = mAvatar;
+            }else if(getItemViewType(position) == 1){
+                avatarUrl = UserManager.getUser().getAvatar();
+            }
+            Utils.loadAvatar(mActivity, avatarUrl, ((ItemViewHolder)holder).ivAvatar, 15);
 //            ((ItemViewHolder)holder).container.setOnClickListener(new View.OnClickListener() {
 //                @Override
 //                public void onClick(View v) {
@@ -187,7 +196,6 @@ public class ChatFragment extends BaseFragment {
 //            mSv.fullScroll(View.FOCUS_DOWN);
 //        }
         mMsgList.add(event);
-//        mAdapter.notifyDataSetChanged();
         mAdapter.notifyItemInserted(mMsgList.size() - 1);
         mRvChat.smoothScrollToPosition(mMsgList.size() - 1);
     }

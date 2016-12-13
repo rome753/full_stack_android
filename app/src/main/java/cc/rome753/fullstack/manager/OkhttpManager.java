@@ -41,9 +41,9 @@ public class OkhttpManager {
 
     private static class Holder{
         static final OkHttpClient sClient = new OkHttpClient.Builder()
-                .readTimeout(3000, TimeUnit.SECONDS)//设置读取超时时间
-                .writeTimeout(3000, TimeUnit.SECONDS)//设置写的超时时间
-                .connectTimeout(3000, TimeUnit.SECONDS)//设置连接超时时间
+                .readTimeout(100, TimeUnit.SECONDS)//设置读取超时时间
+                .writeTimeout(100, TimeUnit.SECONDS)//设置写的超时时间
+                .connectTimeout(3, TimeUnit.SECONDS)//设置连接超时时间
                 .cookieJar(new CookieManager())
                 .build();
     }

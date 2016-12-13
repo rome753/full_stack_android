@@ -66,13 +66,13 @@ public class MainActivity extends BaseActivity {
             public Fragment onCreateFragment(int position) {
                 switch (position){
                     case 0:
-                        return ChatFragment.newInstance("");
+                        return ChatFragment.newInstance("","");
                     case 1:
                         return FindFragment.newInstance();
                     case 2:
                         return UserFragment.newInstance();
                 }
-                return ChatFragment.newInstance("");
+                return ChatFragment.newInstance("","");
             }
 
             @Override

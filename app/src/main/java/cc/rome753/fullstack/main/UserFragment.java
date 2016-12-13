@@ -15,8 +15,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +30,6 @@ import cc.rome753.fullstack.Utils;
 import cc.rome753.fullstack.bean.User;
 import cc.rome753.fullstack.event.HttpHandler;
 import cc.rome753.fullstack.manager.ChatManager;
-import cc.rome753.fullstack.manager.GlideRoundTransform;
 import cc.rome753.fullstack.manager.OkhttpManager;
 import cc.rome753.fullstack.manager.UserManager;
 
@@ -141,11 +138,10 @@ public class UserFragment extends BaseFragment {
                 mUser = Utils.decode(response, User.class);
                 if(mUser == null) return;
 
-                if(!TextUtils.isEmpty(mUser.avatar)) {
-                    int radius = Utils.dp2px(50);
-                    Glide.with(mActivity).load(mUser.avatar)
-                            .transform(new GlideRoundTransform(mActivity, radius)).into(ivAvatar);
+                if(!TextUtils.isEmpty(mUser.avatar)){
+                    UserManager.getUser().setAvatar(mUser.avatar);
                 }
+                Utils.loadAvatar(mActivity, mUser.avatar, ivAvatar, 50);
 
                 tvName.setText("姓名: " + mUser.name);
                 tvAge.setText("年龄: " + mUser.age);
