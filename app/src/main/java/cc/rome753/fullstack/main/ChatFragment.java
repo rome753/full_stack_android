@@ -20,7 +20,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -29,9 +28,11 @@ import butterknife.OnClick;
 import cc.rome753.fullstack.BaseFragment;
 import cc.rome753.fullstack.R;
 import cc.rome753.fullstack.Utils;
-import cc.rome753.fullstack.callback.OnItemClickListener;
+import cc.rome753.fullstack.bean.ChatMsg;
+import cc.rome753.fullstack.bean.User;
 import cc.rome753.fullstack.event.WsMessageEvent;
 import cc.rome753.fullstack.manager.ChatManager;
+import cc.rome753.fullstack.manager.DbManager;
 import cc.rome753.fullstack.manager.UserManager;
 
 /**
@@ -47,14 +48,30 @@ public class ChatFragment extends BaseFragment {
     Button mBtn;
 
     /**
-     * 对方用户名，""代表所有人
+     * 是否两人聊天
+     */
+    public boolean isPair;
+
+    /**
+     * 对方用户名
      */
     String mName;
+    /**
+     * 对方头像
+     */
     String mAvatar;
 
     ChatAdapter mAdapter;
     
-    List<WsMessageEvent> mMsgList;
+    List<ChatMsg> mMsgList;
+
+
+    public static ChatFragment newInstance() {
+        Bundle args = new Bundle();
+        ChatFragment fragment = new ChatFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     public static ChatFragment newInstance(String name, String avatar) {
         Bundle args = new Bundle();
@@ -70,6 +87,15 @@ public class ChatFragment extends BaseFragment {
         super.onCreate(savedInstanceState);
         mName = getArguments().getString("name");
         mAvatar = getArguments().getString("avatar");
+
+        mName = mName == null ? "" : mName;
+        isPair = !TextUtils.isEmpty(mName);
+
+        if(TextUtils.isEmpty(mName)){
+            mMsgList = DbManager.getInstance().getChatMsgType(0);
+        }else {
+            mMsgList = DbManager.getInstance().getChatMsgFrom(mName);
+        }
     }
 
     @Nullable
@@ -77,48 +103,49 @@ public class ChatFragment extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_chat, container, false);
         ButterKnife.bind(this, view);
-        
-        mMsgList = new ArrayList<>();
+
         mAdapter = new ChatAdapter();
         mRvChat.setLayoutManager(new LinearLayoutManager(mActivity));
         mRvChat.setItemAnimator(new DefaultItemAnimator());
-        mAdapter.setOnItemClickListener(new OnItemClickListener() {
 
-            @Override
-            public void onItemClick(int positon, Object data) {
-            }
-        });
         mRvChat.setAdapter(mAdapter);
+        if(mMsgList.size() > 0) {
+            mRvChat.smoothScrollToPosition(mMsgList.size() - 1);
+        }
+
         return view;
+    }
+
+    /**
+     * 正在聊天的对方名字
+     * @return
+     */
+    public String getName(){
+        return mName;
     }
 
     class ChatAdapter extends RecyclerView.Adapter{
 
-        private OnItemClickListener onItemClickListener;
-
-        void setOnItemClickListener(OnItemClickListener onItemClickListener){
-            this.onItemClickListener = onItemClickListener;
-        }
+        final int TYPE_ME = -1;     //我发的消息,放右边
+        final int TYPE_OTHER = 1;   //别人发的消息,放左边
         
-        WsMessageEvent getItem(int position){
+        ChatMsg getItem(int position){
             return mMsgList.get(position);
         }
 
-        /**
-         *  0 - left
-         *  1 - right
-         * @return
-         */
         @Override
         public int getItemViewType(int position) {
-            boolean isMe = !mName.equals(getItem(position).from);
-            return isMe ? 1 : 0;
+            ChatMsg msg = getItem(position);
+            if(isPair){
+                return msg.type/* == -1 ? TYPE_ME : TYPE_OTHER*/;
+            }
+            return msg.from.equals(UserManager.getUser().getName()) ? TYPE_ME : TYPE_OTHER;
         }
 
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(final ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(mActivity).inflate(
-                    viewType == 0 ? R.layout.item_chat_left : R.layout.item_chat_right, parent, false);
+                    viewType == TYPE_ME ? R.layout.item_chat_right : R.layout.item_chat_left, parent, false);
             ItemViewHolder holder = new ItemViewHolder(view);
             return holder;
         }
@@ -129,20 +156,17 @@ public class ChatFragment extends BaseFragment {
             ((ItemViewHolder)holder).tvMsg.setText(msg);
 
             String avatarUrl = "";
-            if(getItemViewType(position) == 0){
-                avatarUrl = mAvatar;
-            }else if(getItemViewType(position) == 1){
+            if(getItemViewType(position) == TYPE_OTHER){
+                if(isPair){
+                    avatarUrl = mAvatar;
+                }else {
+                    User user = UserManager.getUser().getOnlineUsers().get(getItem(position).from);
+                    avatarUrl = user == null ? "" : user.avatar;
+                }
+            }else /*if(getItemViewType(position) == TYPE_ME)*/{
                 avatarUrl = UserManager.getUser().getAvatar();
             }
             Utils.loadAvatar(mActivity, avatarUrl, ((ItemViewHolder)holder).ivAvatar, 15);
-//            ((ItemViewHolder)holder).container.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    if(onItemClickListener != null){
-//                        onItemClickListener.onItemClick(holder.getAdapterPosition(), name);
-//                    }
-//                }
-//            });
         }
 
         @Override
@@ -191,13 +215,13 @@ public class ChatFragment extends BaseFragment {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onWsMessageEvent(WsMessageEvent event) {
-//        if (mTv != null) {
-//            mTv.append(event.from + "说：" + event.msg + "\n");
-//            mSv.fullScroll(View.FOCUS_DOWN);
-//        }
-        mMsgList.add(event);
-        mAdapter.notifyItemInserted(mMsgList.size() - 1);
-        mRvChat.smoothScrollToPosition(mMsgList.size() - 1);
+        ChatMsg msg = event.chatMsg;
+        if((msg.type == 0 && !isPair)
+                || (msg.type != 0 && msg.from.equals(mName))) {
+            mMsgList.add(event.chatMsg);
+            mAdapter.notifyItemInserted(mMsgList.size() - 1);
+            mRvChat.smoothScrollToPosition(mMsgList.size() - 1);
+        }
     }
 
     @Override

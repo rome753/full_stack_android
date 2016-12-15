@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.v4.app.Fragment;
 import android.view.Menu;
+import android.view.MenuItem;
 
 import com.roughike.bottombar.BottomBar;
 import com.roughike.bottombar.OnTabSelectListener;
@@ -66,13 +67,13 @@ public class MainActivity extends BaseActivity {
             public Fragment onCreateFragment(int position) {
                 switch (position){
                     case 0:
-                        return ChatFragment.newInstance("","");
+                        return ChatFragment.newInstance();
                     case 1:
                         return FindFragment.newInstance();
                     case 2:
                         return UserFragment.newInstance();
                 }
-                return ChatFragment.newInstance("","");
+                return ChatFragment.newInstance();
             }
 
             @Override
@@ -127,6 +128,14 @@ public class MainActivity extends BaseActivity {
         getMenuInflater().inflate(R.menu.main, menu);
         mOnlineDrawable = (LevelListDrawable) menu.findItem(R.id.action_online).getIcon();
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId() == R.id.action_online){
+            ChatManager.open();
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     public static void setOnlineDrawable(){

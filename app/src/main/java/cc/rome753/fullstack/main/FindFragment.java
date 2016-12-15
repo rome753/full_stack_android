@@ -18,8 +18,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -34,6 +33,7 @@ import cc.rome753.fullstack.event.HttpHandler;
 import cc.rome753.fullstack.event.WsComesEvent;
 import cc.rome753.fullstack.event.WsLeavesEvent;
 import cc.rome753.fullstack.manager.OkhttpManager;
+import cc.rome753.fullstack.manager.UserManager;
 import cc.rome753.fullstack.view.DividerItemDecoration;
 
 import static cc.rome753.fullstack.main.MainActivity.setOnlineDrawable;
@@ -54,7 +54,7 @@ public class FindFragment extends BaseFragment {
 
     View mHeaderView;
 
-    List<User> mUserList;
+    LinkedHashMap<String, User> mUsersMap;
 
     public static FindFragment newInstance() {
         Bundle args = new Bundle();
@@ -70,7 +70,8 @@ public class FindFragment extends BaseFragment {
         View view = inflater.inflate(R.layout.fragment_find, container, false);
         ButterKnife.bind(this, view);
 
-        mUserList = new ArrayList<>();
+        mUsersMap = new LinkedHashMap<>();
+        UserManager.getUser().setOnlineUsers(mUsersMap);
 
         mAdapter = new UserAdapter();
         mRvUsers.setLayoutManager(new LinearLayoutManager(mActivity));
@@ -105,8 +106,10 @@ public class FindFragment extends BaseFragment {
                 OnlineUsers online = Utils.decode(response, OnlineUsers.class);
                 if(online == null) return;
 
-                mUserList.clear();
-                mUserList.addAll(online.online_users);
+                mUsersMap.clear();
+                for(User user : online.online_users){
+                    mUsersMap.put(user.name, user);
+                }
                 mAdapter.notifyDataSetChanged();
             }
 
@@ -134,15 +137,9 @@ public class FindFragment extends BaseFragment {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onWsComesEvent(WsComesEvent event) {
         User user = event.user;
-        boolean b = false;
-        for(User u : mUserList){
-            if(user.name.equals(u.name)){
-                b = true;
-                break;
-            }
-        }
-        if(!b){
-            mUserList.add(user);
+
+        if(!mUsersMap.containsKey(user.name)){
+            mUsersMap.put(user.name, user);
             mAdapter.notifyDataSetChanged();
         }
     }
@@ -150,15 +147,9 @@ public class FindFragment extends BaseFragment {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onWsLeavesEvent(WsLeavesEvent event) {
         String name = event.name;
-        int index = -1;
-        for(User u : mUserList){
-            if(name.equals(u.name)){
-                index = mUserList.indexOf(u);
-                break;
-            }
-        }
-        if(index != -1){
-            mUserList.remove(index);
+
+        if(mUsersMap.containsKey(name)){
+            mUsersMap.remove(name);
             mAdapter.notifyDataSetChanged();
         }
     }
@@ -209,14 +200,23 @@ public class FindFragment extends BaseFragment {
             if(getItemViewType(position) == 0){
                 return;
             }
-            final User user = mUserList.get(position - 1);
+
+            User user = new User();
+            int index = 0;
+            for(User u : mUsersMap.values()){
+                if(index++ == position - 1){
+                    user = u;
+                    break;
+                }
+            }
             ((ItemViewHolder)holder).tvName.setText(user.name);
             Utils.loadAvatar(mActivity, user.avatar, ((ItemViewHolder)holder).ivAvatar, 25);
+            final User finalUser = user;
             ((ItemViewHolder) holder).container.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if(onItemClickListener != null){
-                        onItemClickListener.onItemClick(holder.getAdapterPosition(), user);
+                        onItemClickListener.onItemClick(holder.getAdapterPosition(), finalUser);
                     }
                 }
             });
@@ -224,7 +224,7 @@ public class FindFragment extends BaseFragment {
 
         @Override
         public int getItemCount() {
-            return mUserList.size() + 1;
+            return mUsersMap.size() + 1;
         }
 
         class HeaderViewHolder extends RecyclerView.ViewHolder{

@@ -101,21 +101,23 @@ public class ChatManager {
 
             @Override
             public void onMessage(ResponseBody message) throws IOException {
-                final String msg = message.source().readByteString().utf8();
-                Log.d("WebSocket", "onMessage:" + msg);
+                final String jsonMsg = message.source().readByteString().utf8();
+                Log.d("WebSocket", "onMessage:" + jsonMsg);
                 if (message.contentType() == WebSocket.TEXT) {
-                    ChatMsg wsMsg = new Gson().fromJson(msg, ChatMsg.class);
-                    switch (wsMsg.type){
-                        case 0://to all
-                        case 1://to me
-                            EventBus.getDefault().post(new WsMessageEvent(wsMsg.from, wsMsg.msg));
-                            NotificationUtils.showMsg(wsMsg.from, wsMsg.msg);
+                    ChatMsg msg = new Gson().fromJson(jsonMsg, ChatMsg.class);
+                    switch (msg.type){
+                        case -1://我发给某人, 服务器转发给我, msg.from代表某人
+                        case 0://发送给所有人的消息
+                        case 1://某人发送给我, msg.from代表某人
+                            DbManager.getInstance().addChatMsg(msg);
+                            EventBus.getDefault().post(new WsMessageEvent(msg));
+                            NoticeManager.getInstance().showNotification(msg);
                             break;
                         case 2:// comes
-                            EventBus.getDefault().post(new WsComesEvent(wsMsg.from, wsMsg.msg));
+                            EventBus.getDefault().post(new WsComesEvent(msg.from, msg.msg));
                             break;
                         case 3:// leaves
-                            EventBus.getDefault().post(new WsLeavesEvent(wsMsg.from));
+                            EventBus.getDefault().post(new WsLeavesEvent(msg.from));
                             break;
                     }
                 } else {

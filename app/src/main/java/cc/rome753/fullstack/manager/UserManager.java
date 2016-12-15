@@ -3,7 +3,10 @@ package cc.rome753.fullstack.manager;
 import android.content.SharedPreferences;
 import android.text.TextUtils;
 
+import java.util.LinkedHashMap;
+
 import cc.rome753.fullstack.App;
+import cc.rome753.fullstack.bean.User;
 
 /**
  * Created by rome753 on 2016/11/26.
@@ -16,6 +19,20 @@ public class UserManager {
     private String id;
     private String name;
     private String avatar;
+
+    public LinkedHashMap<String, User> getOnlineUsers() {
+        if(onlineUsers == null){
+            return new LinkedHashMap<>();
+        }
+        return onlineUsers;
+    }
+
+    public void setOnlineUsers(LinkedHashMap<String, User> onlineUsers) {
+        this.onlineUsers = onlineUsers;
+    }
+
+    //在线其他用户
+    private LinkedHashMap<String, User> onlineUsers;
     
     SharedPreferences mPrefs;
     
@@ -80,6 +97,7 @@ public class UserManager {
         avatar = "";
         getPrefs().edit().clear().apply();
         CookieManager.clear();
+        NoticeManager.getInstance().clearNotification();
     }
 
 }

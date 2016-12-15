@@ -10,15 +10,30 @@ import android.support.v4.app.TaskStackBuilder;
 import cc.rome753.fullstack.App;
 import cc.rome753.fullstack.ChatActivity;
 import cc.rome753.fullstack.R;
+import cc.rome753.fullstack.bean.ChatMsg;
 
 /**
  * Created by rome753 on 2016/12/13.
  */
 
-public class NotificationUtils {
+public class NoticeManager {
 
-    public static void showMsg(String from, String msg){
-        if(from.equals(UserManager.getUser().getName())){
+    private NoticeManager(){
+        mManager = (NotificationManager) App.sContext.getSystemService(Context.NOTIFICATION_SERVICE);
+    }
+
+    public static NoticeManager getInstance(){
+        return Holder.INSTANCE;
+    }
+
+    private static class Holder{
+        static final NoticeManager INSTANCE = new NoticeManager();
+    }
+
+    private NotificationManager mManager;
+
+    public void showNotification(ChatMsg msg){
+        if(msg.type == -1 || msg.from.equals(UserManager.getUser().getName())){
             return;
         }
         Context context = App.sContext;
@@ -31,11 +46,12 @@ public class NotificationUtils {
                         .setFullScreenIntent(pendingIntent, true)
                         .setSmallIcon(R.drawable.ic_launcher)
                         .setContentTitle("新消息")
-                        .setContentText(from + "： " + msg);
+                        .setContentText(msg.from + "： " + msg.msg);
 
 // Creates an explicit intent for an Activity in your app
         Intent resultIntent = new Intent(context, ChatActivity.class);
-        resultIntent.putExtra("name", from);
+        String name = msg.type == 0 ? "" : msg.from;
+        resultIntent.putExtra("name", name);
 // The stack builder object will contain an artificial back stack for the
 // started Activity.
 // This ensures that navigating backward from the Activity leads out of
@@ -51,9 +67,11 @@ public class NotificationUtils {
                         PendingIntent.FLAG_UPDATE_CURRENT
                 );
         mBuilder.setContentIntent(resultPendingIntent);
-        NotificationManager mNotificationManager =
-                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 // mId allows you to update the notification later on.
-        mNotificationManager.notify(0, mBuilder.build());
+        mManager.notify(0, mBuilder.build());
+    }
+
+    public void clearNotification(){
+        mManager.cancelAll();
     }
 }
