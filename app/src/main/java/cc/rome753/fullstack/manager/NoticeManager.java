@@ -33,6 +33,11 @@ public class NoticeManager {
     private NotificationManager mManager;
 
     public void showNotification(ChatMsg msg){
+        //当前有活动显示的话, 不弹通知
+        if(!App.isBackground()){
+            return;
+        }
+        //自己发的消息, 不弹通知
         if(msg.type == -1 || msg.from.equals(UserManager.getUser().getName())){
             return;
         }
@@ -71,7 +76,7 @@ public class NoticeManager {
         mManager.notify(0, mBuilder.build());
     }
 
-    public void clearNotification(){
+    public void clear(){
         mManager.cancelAll();
     }
 }

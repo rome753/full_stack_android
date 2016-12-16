@@ -19,10 +19,19 @@ public class DbManager {
     private ChatMsgDao mChatMsgDao;
 
     private DbManager() {
-        DaoMaster.DevOpenHelper devOpenHelper = new DaoMaster.DevOpenHelper(App.sContext, "fullstack-db", null);
-        DaoMaster mDaoMaster = new DaoMaster(devOpenHelper.getWritableDatabase());
+        //不同登录用户用不同db
+        String name = UserManager.getUser().getName();
+        DaoMaster.DevOpenHelper devOpenHelper = new DaoMaster.DevOpenHelper(App.sContext, "fullstack-db-"+name, null);
+        mDaoMaster = new DaoMaster(devOpenHelper.getWritableDatabase());
         mDaoSession = mDaoMaster.newSession();
         mChatMsgDao = mDaoSession.getChatMsgDao();
+    }
+
+    /**
+     * 用户登出, 注销实例
+     */
+    public void close(){
+        mInstance = null;
     }
 
     public static DbManager getInstance() {

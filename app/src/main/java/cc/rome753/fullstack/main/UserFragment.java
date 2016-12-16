@@ -30,6 +30,9 @@ import cc.rome753.fullstack.Utils;
 import cc.rome753.fullstack.bean.User;
 import cc.rome753.fullstack.event.HttpHandler;
 import cc.rome753.fullstack.manager.ChatManager;
+import cc.rome753.fullstack.manager.CookieManager;
+import cc.rome753.fullstack.manager.DbManager;
+import cc.rome753.fullstack.manager.NoticeManager;
 import cc.rome753.fullstack.manager.OkhttpManager;
 import cc.rome753.fullstack.manager.UserManager;
 
@@ -80,6 +83,9 @@ public class UserFragment extends BaseFragment {
                 Utils.toast(response);
                 UserManager.getUser().logout();
                 ChatManager.close();
+                CookieManager.clear();
+                NoticeManager.getInstance().clear();
+                DbManager.getInstance().close();
                 LoginActivity.start(mActivity);
                 mActivity.finish();
             }

@@ -91,11 +91,7 @@ public class ChatFragment extends BaseFragment {
         mName = mName == null ? "" : mName;
         isPair = !TextUtils.isEmpty(mName);
 
-        if(TextUtils.isEmpty(mName)){
-            mMsgList = DbManager.getInstance().getChatMsgType(0);
-        }else {
-            mMsgList = DbManager.getInstance().getChatMsgFrom(mName);
-        }
+        loadMsg();
     }
 
     @Nullable
@@ -114,6 +110,14 @@ public class ChatFragment extends BaseFragment {
         }
 
         return view;
+    }
+
+    public void loadMsg(){
+        if(TextUtils.isEmpty(mName)){
+            mMsgList = DbManager.getInstance().getChatMsgType(0);
+        }else {
+            mMsgList = DbManager.getInstance().getChatMsgFrom(mName);
+        }
     }
 
     /**

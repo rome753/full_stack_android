@@ -61,11 +61,18 @@ public class ChatActivity extends BaseActivity {
 
         if(mChatFragment != null){
             if(isPair){
-                if(mChatFragment.isPair) return;
+                if(mChatFragment.isPair) {//加载未读的消息
+                    mChatFragment.loadMsg();
+                    return;
+                }
             }else{
-                if(mName.equals(mChatFragment.getName())) return;
+                if(mName.equals(mChatFragment.getName())) {//加载未读的消息
+                    mChatFragment.loadMsg();
+                    return;
+                }
             }
         }
+
         if(mChatFragment == null || (isPair != mChatFragment.isPair)){
             if(isPair) {
                 mChatFragment = ChatFragment.newInstance(mName, mAvatar);

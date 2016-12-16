@@ -96,8 +96,6 @@ public class UserManager {
         name = "";
         avatar = "";
         getPrefs().edit().clear().apply();
-        CookieManager.clear();
-        NoticeManager.getInstance().clearNotification();
     }
 
 }
