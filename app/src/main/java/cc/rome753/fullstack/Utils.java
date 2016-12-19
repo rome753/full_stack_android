@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.text.TextUtils;
 import android.util.Pair;
-import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -28,7 +27,7 @@ import cc.rome753.fullstack.manager.GlideRoundTransform;
 import static cc.rome753.fullstack.App.sContext;
 
 /**
- * Created by Administrator on 2016/11/17.
+ * Created by rome753 on 2016/11/17.
  */
 
 public class Utils {
@@ -130,9 +129,13 @@ public class Utils {
         return (int) (spValue * fontScale + 0.5f);
     }
 
-    public static void hideKeyboard(BaseActivity activity, View view){
+    /**
+     * 隐藏键盘, activity的windowSoftInputMode会影响
+     * @param activity
+     */
+    public static void hideKeyboard(BaseActivity activity){
         InputMethodManager manager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-        manager.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+        manager.hideSoftInputFromWindow(activity.getWindow().getDecorView().getWindowToken(), 0);
     }
 
     public static void loadAvatar(Context context, String url, ImageView imageView, int radiusDp){

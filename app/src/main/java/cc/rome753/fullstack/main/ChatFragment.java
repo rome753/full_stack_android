@@ -9,6 +9,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -109,6 +110,16 @@ public class ChatFragment extends BaseFragment {
             mRvChat.smoothScrollToPosition(mMsgList.size() - 1);
         }
 
+        mRvChat.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if(event.getAction() == MotionEvent.ACTION_DOWN){
+                    Utils.hideKeyboard(mActivity);
+                }
+                return false;
+            }
+        });
+
         return view;
     }
 
@@ -200,18 +211,9 @@ public class ChatFragment extends BaseFragment {
     public void sendMsg() {
         String msg = mEt.getText().toString().trim();
         if(TextUtils.isEmpty(msg)) return;
-        boolean result;
-        switch (mName){
-            case ChatManager.ALL_NAME:
-                result = ChatManager.send2All(msg);
-                break;
-            case ChatManager.ROBOT_NAME:
-                result = ChatManager.send2Robot(msg);
-                break;
-            default:
-                result = ChatManager.send2User(mName, msg);
-                break;
-        }
+
+        boolean result = isPair ? ChatManager.send2User(mName, msg) : ChatManager.send2All(msg);
+
         if (result) {
             mEt.setText("");
         }
@@ -244,21 +246,6 @@ public class ChatFragment extends BaseFragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         //menu状态被重置, 需要刷新
         MainActivity.setOnlineDrawable();
-    }
-
-    @Override
-    public void onDestroy() {
-        //销毁时隐藏键盘, 无效?
-        Utils.hideKeyboard(mActivity, mEt);
-        super.onDestroy();
-    }
-
-    @Override
-    public void onHiddenChanged(boolean hidden) {
-        //切换为hide时隐藏键盘
-        if(hidden){
-            Utils.hideKeyboard(mActivity, mEt);
-        }
     }
 
 }

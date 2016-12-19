@@ -10,7 +10,7 @@ import android.util.Log;
 import java.util.List;
 
 /**
- * Created by Administrator on 2016/11/17.
+ * Created by rome753 on 2016/11/17.
  */
 
 public class App extends Application {

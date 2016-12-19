@@ -2,28 +2,40 @@ package cc.rome753.fullstack;
 
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import butterknife.ButterKnife;
+import cn.pedant.SweetAlert.SweetAlertDialog;
 
 /**
- * Created by Administrator on 2016/11/17.
+ * Created by rome753 on 2016/11/17.
  */
 public abstract class BaseActivity extends AppCompatActivity {
 
     public abstract int setView();
 
-    // add for MainActivity
-    protected void initFragmentNavigator(Bundle savedInstanceState){}
-
     protected BaseActivity mActivity;
 
     public ActionBar mActionBar;
 
-    protected AlertDialog mWaitDialog;
+    protected SweetAlertDialog mDialog;
+
+    protected void showDialog(){
+        if(mDialog == null){
+            mDialog = new SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE);
+        }
+        mDialog.setTitleText("...");
+        mDialog.setCancelable(false);
+        mDialog.show();
+    }
+
+    protected void hideDialog(){
+        if(mDialog != null){
+            mDialog.hide();
+        }
+    }
 
 
     @Override
@@ -40,11 +52,14 @@ public abstract class BaseActivity extends AppCompatActivity {
 
         mActivity = this;
 
-        mWaitDialog = new AlertDialog.Builder(this)
-                .setCancelable(true)
-                .setIcon(R.drawable.ic_launcher)
-                .setMessage("处理中。。。")
-                .create();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if(mDialog != null){
+            mDialog.dismiss();
+        }
+        super.onDestroy();
     }
 
     /**

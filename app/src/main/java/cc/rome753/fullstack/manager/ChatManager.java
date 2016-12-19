@@ -1,7 +1,5 @@
 package cc.rome753.fullstack.manager;
 
-import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -13,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 import cc.rome753.fullstack.bean.ChatMsg;
 import cc.rome753.fullstack.bean.ChatSend;
+import cc.rome753.fullstack.bean.RecentMsg;
 import cc.rome753.fullstack.event.WsComesEvent;
 import cc.rome753.fullstack.event.WsFailureEvent;
 import cc.rome753.fullstack.event.WsLeavesEvent;
@@ -38,7 +37,6 @@ public class ChatManager {
     private ChatManager(){}
 
     public static final String ALL_NAME = "";
-    public static final String ROBOT_NAME = "lara";
 
     private static String SCHEME="ws://";
 
@@ -48,27 +46,11 @@ public class ChatManager {
 
     private static WebSocket mWebSocket;
 
-    private static Handler mHandler;
-
     /**
-     * 打开聊天ws连接， 先过滤掉1s内的重复请求
+     * 打开聊天ws连接
      */
     public static void open(){
-        if(mWebSocket == null) {
-            if(mHandler == null) mHandler = new Handler(){
-                @Override
-                public void handleMessage(Message msg) {
-                    openChat();
-                }
-            };
-            mHandler.removeMessages(0);
-            Message message = Message.obtain();
-            message.what = 0;
-            mHandler.sendMessageDelayed(message, 1000);
-        }
-    }
-
-    private static void openChat(){
+        if(mWebSocket != null) return;
         Log.d("WebSocket", "openChat");
         if(mOkhttpClient == null){
             mOkhttpClient = new OkHttpClient.Builder()
@@ -94,7 +76,7 @@ public class ChatManager {
 
             @Override
             public void onFailure(IOException e, Response response) {
-                Log.d("WebSocket","onFailure: " + e);
+                Log.e("WebSocket","onFailure: " + e);
                 mWebSocket = null;
                 EventBus.getDefault().post(new WsFailureEvent(e.getMessage()));
             }
@@ -110,6 +92,9 @@ public class ChatManager {
                         case 0://发送给所有人的消息
                         case 1://某人发送给我, msg.from代表某人
                             DbManager.getInstance().addChatMsg(msg);
+                            RecentMsg recentMsg = new RecentMsg(null, msg.type, msg.from,
+                                    msg.msg, msg.time, "");
+                            DbManager.getInstance().updateRecentMsg(recentMsg);
                             EventBus.getDefault().post(new WsMessageEvent(msg));
                             NoticeManager.getInstance().showNotification(msg);
                             break;
@@ -152,22 +137,17 @@ public class ChatManager {
     }
 
     private static boolean sendId(String id){
-        ChatSend c = new ChatSend(0, "", id);
+        ChatSend c = new ChatSend(99, "", id);
         return send(c);
     }
 
     public static boolean send2All(String msg){
-        ChatSend c = new ChatSend(1, ALL_NAME, msg);
+        ChatSend c = new ChatSend(0, ALL_NAME, msg);
         return send(c);
     }
 
     public static boolean send2User(String to, String msg){
-        ChatSend c = new ChatSend(2, to, msg);
-        return send(c);
-    }
-
-    public static boolean send2Robot(String msg){
-        ChatSend c = new ChatSend(3, ROBOT_NAME, msg);
+        ChatSend c = new ChatSend(1, to, msg);
         return send(c);
     }
 

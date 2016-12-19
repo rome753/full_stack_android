@@ -17,7 +17,6 @@ import cc.rome753.fullstack.bean.Login;
 import cc.rome753.fullstack.bean.Register;
 import cc.rome753.fullstack.event.HttpHandler;
 import cc.rome753.fullstack.main.MainActivity;
-import cc.rome753.fullstack.manager.ChatManager;
 import cc.rome753.fullstack.manager.OkhttpManager;
 import cc.rome753.fullstack.manager.UserManager;
 
@@ -107,21 +106,20 @@ public class LoginActivity extends BaseActivity {
         }
 
         String json = new Gson().toJson(new Login(u,p));
-        mWaitDialog.show();
+        showDialog();
         OkhttpManager.post("login", json, new HttpHandler() {
 
             @Override
             public void onSuccess(String response) {
-                mWaitDialog.hide();
+                hideDialog();
                 UserManager.getUser().setName(u);
-                ChatManager.open();
                 MainActivity.start(mActivity);
                 finish();
             }
 
             @Override
             public void onFailure() {
-                mWaitDialog.hide();
+                hideDialog();
             }
         });
     }

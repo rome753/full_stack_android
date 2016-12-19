@@ -15,9 +15,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:launchMode="singleTask"
             android:name=".ChatActivity"
-            android:windowSoftInputMode="stateHidden">
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="stateAlwaysHidden">
         </activity>
         <activity
             android:name=".LoginActivity"
@@ -31,14 +31,20 @@
             </intent-filter>
         </activity>
         <activity
-            android:launchMode="singleTask"
             android:name=".main.MainActivity"
-            android:windowSoftInputMode="stateHidden">
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="stateAlwaysHidden">
         </activity>
         <activity android:name=".UserEditActivity">
         </activity>
         <activity android:name=".ImageActivity">
         </activity>
+
+        <service
+            android:name=".ChatConnectionService"
+            android:enabled="true"
+            android:exported="true">
+        </service>
     </application>
 
 </manifest>

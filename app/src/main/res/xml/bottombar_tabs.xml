@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <tabs>
     <tab
-        id="@+id/tab_chat"
+        id="@+id/tab_recent"
         icon="@drawable/ic_menu_start_conversation"
-        title="聊天"
+        title="最近"
         barColorWhenSelected="#aa5522" />
     <tab
         id="@+id/tab_find"

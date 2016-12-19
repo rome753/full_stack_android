@@ -17,11 +17,11 @@
     <com.roughike.bottombar.BottomBar
         android:id="@+id/bottombar"
         android:layout_width="match_parent"
-        android:layout_height="55dp"
+        android:layout_height="60dp"
         android:background="#a82"
+        app:bb_showShadow="false"
         app:bb_inActiveTabAlpha="0.6"
         app:bb_activeTabAlpha="1"
-        app:bb_behavior="shifting"
         app:bb_inActiveTabColor="#222222"
         app:bb_tabXmlResource="@xml/bottombar_tabs" />
 

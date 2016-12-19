@@ -82,7 +82,6 @@ public class UserFragment extends BaseFragment {
             public void onSuccess(String response) {
                 Utils.toast(response);
                 UserManager.getUser().logout();
-                ChatManager.close();
                 CookieManager.clear();
                 NoticeManager.getInstance().clear();
                 DbManager.getInstance().close();

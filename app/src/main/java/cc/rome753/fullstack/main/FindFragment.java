@@ -14,10 +14,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
-
 import java.util.LinkedHashMap;
 
 import butterknife.BindView;
@@ -30,14 +26,11 @@ import cc.rome753.fullstack.bean.User;
 import cc.rome753.fullstack.bean.response.OnlineUsers;
 import cc.rome753.fullstack.callback.OnItemClickListener;
 import cc.rome753.fullstack.event.HttpHandler;
-import cc.rome753.fullstack.event.WsComesEvent;
-import cc.rome753.fullstack.event.WsLeavesEvent;
 import cc.rome753.fullstack.manager.OkhttpManager;
 import cc.rome753.fullstack.manager.UserManager;
 import cc.rome753.fullstack.view.DividerItemDecoration;
 
 import static cc.rome753.fullstack.main.MainActivity.setOnlineDrawable;
-import static cc.rome753.fullstack.manager.ChatManager.ROBOT_NAME;
 
 /**
  * Created by crc on 16/11/30.
@@ -45,7 +38,7 @@ import static cc.rome753.fullstack.manager.ChatManager.ROBOT_NAME;
 
 public class FindFragment extends BaseFragment {
 
-    @BindView(R.id.rvUsers)
+    @BindView(R.id.rv_users)
     RecyclerView mRvUsers;
     @BindView(R.id.swipe)
     SwipeRefreshLayout mSwipe;
@@ -94,6 +87,8 @@ public class FindFragment extends BaseFragment {
             }
         });
 
+        requestData();
+
         return view;
     }
 
@@ -120,34 +115,14 @@ public class FindFragment extends BaseFragment {
         });
     }
 
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        EventBus.getDefault().register(this);
-        requestData();
-    }
-
-    @Override
-    public void onStop() {
-        EventBus.getDefault().unregister(this);
-        super.onStop();
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onWsComesEvent(WsComesEvent event) {
-        User user = event.user;
-
+    public void addUser(User user){
         if(!mUsersMap.containsKey(user.name)){
             mUsersMap.put(user.name, user);
             mAdapter.notifyDataSetChanged();
         }
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onWsLeavesEvent(WsLeavesEvent event) {
-        String name = event.name;
-
+    public void removeUser(String name){
         if(mUsersMap.containsKey(name)){
             mUsersMap.remove(name);
             mAdapter.notifyDataSetChanged();
@@ -182,12 +157,12 @@ public class FindFragment extends BaseFragment {
                     mHeaderView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            ChatActivity.start(mActivity, ROBOT_NAME, "");
+                            ChatActivity.start(mActivity, "", "");
                         }
                     });
                 }
                 HeaderViewHolder holder = new HeaderViewHolder(mHeaderView);
-                holder.tvName.setText(ROBOT_NAME);
+                holder.tvName.setText("群聊");
                 return holder;
             }
             View view = LayoutInflater.from(mActivity).inflate(R.layout.item_online_user, parent, false);

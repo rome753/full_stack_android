@@ -10,7 +10,7 @@ import org.greenrobot.greendao.annotation.Id;
  * Created by rome753 on 2016/11/26.
  */
 @Entity
-public class ChatMsg {
+public class RecentMsg {
 
     @Id(autoincrement = true)
     protected Long id;
@@ -24,58 +24,55 @@ public class ChatMsg {
     public String from;
     public String msg;
     public long time;
-
-    @Generated(hash = 73958405)
-    public ChatMsg(Long id, int type, String from, String msg, long time) {
+    public String avatar;
+    @Generated(hash = 326631741)
+    public RecentMsg(Long id, int type, String from, String msg, long time,
+            String avatar) {
         this.id = id;
         this.type = type;
         this.from = from;
         this.msg = msg;
         this.time = time;
+        this.avatar = avatar;
     }
-
-    @Generated(hash = 1355502543)
-    public ChatMsg() {
+    @Generated(hash = 1016904006)
+    public RecentMsg() {
     }
-
-    public String getMsg() {
-        return this.msg;
-    }
-
-    public void setMsg(String msg) {
-        this.msg = msg;
-    }
-
-    public String getFrom() {
-        return this.from;
-    }
-
-    public void setFrom(String from) {
-        this.from = from;
-    }
-
-    public int getType() {
-        return this.type;
-    }
-
-    public void setType(int type) {
-        this.type = type;
-    }
-
-    public long getTime() {
-        return this.time;
-    }
-
-    public void setTime(long time) {
-        this.time = time;
-    }
-
     public Long getId() {
         return this.id;
     }
-
     public void setId(Long id) {
         this.id = id;
+    }
+    public int getType() {
+        return this.type;
+    }
+    public void setType(int type) {
+        this.type = type;
+    }
+    public String getFrom() {
+        return this.from;
+    }
+    public void setFrom(String from) {
+        this.from = from;
+    }
+    public String getMsg() {
+        return this.msg;
+    }
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+    public long getTime() {
+        return this.time;
+    }
+    public void setTime(long time) {
+        this.time = time;
+    }
+    public String getAvatar() {
+        return this.avatar;
+    }
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 
 }

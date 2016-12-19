@@ -51,7 +51,7 @@ public class ChatActivity extends BaseActivity {
 
         boolean isPair = !TextUtils.isEmpty(mName);
         if(isPair) {
-            setTitle("和 " + mName + " 聊天中。。。");
+            setTitle("和 " + mName + " 聊天中...");
         }else{
             setTitle("群聊中。。。");
         }
@@ -84,4 +84,5 @@ public class ChatActivity extends BaseActivity {
             transaction.commit();
         }
     }
+
 }
