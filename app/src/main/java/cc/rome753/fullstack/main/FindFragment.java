@@ -25,7 +25,7 @@ import cc.rome753.fullstack.Utils;
 import cc.rome753.fullstack.bean.User;
 import cc.rome753.fullstack.bean.response.OnlineUsers;
 import cc.rome753.fullstack.callback.OnItemClickListener;
-import cc.rome753.fullstack.event.HttpHandler;
+import cc.rome753.fullstack.callback.HttpHandler;
 import cc.rome753.fullstack.manager.OkhttpManager;
 import cc.rome753.fullstack.manager.UserManager;
 import cc.rome753.fullstack.view.DividerItemDecoration;

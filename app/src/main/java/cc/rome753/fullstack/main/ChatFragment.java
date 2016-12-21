@@ -1,11 +1,18 @@
 package cc.rome753.fullstack.main;
 
+import android.content.ContentResolver;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.ThumbnailUtils;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,10 +24,13 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.io.File;
 import java.util.List;
 
 import butterknife.BindView;
@@ -31,10 +41,13 @@ import cc.rome753.fullstack.R;
 import cc.rome753.fullstack.Utils;
 import cc.rome753.fullstack.bean.ChatMsg;
 import cc.rome753.fullstack.bean.User;
+import cc.rome753.fullstack.callback.SendFileCallback;
 import cc.rome753.fullstack.event.WsMessageEvent;
 import cc.rome753.fullstack.manager.ChatManager;
 import cc.rome753.fullstack.manager.DbManager;
 import cc.rome753.fullstack.manager.UserManager;
+
+import static android.app.Activity.RESULT_OK;
 
 /**
  * Created by crc on 16/11/30.
@@ -168,7 +181,16 @@ public class ChatFragment extends BaseFragment {
         @Override
         public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
             final String msg = getItem(position).msg;
-            ((ItemViewHolder)holder).tvMsg.setText(msg);
+            if(msg.startsWith("image://")){
+                String url = msg.replace("image://", "");
+                ((ItemViewHolder) holder).ivMsg.setVisibility(View.VISIBLE);
+                Glide.with(mActivity).load(url).into(((ItemViewHolder) holder).ivMsg);
+                ((ItemViewHolder) holder).tvMsg.setVisibility(View.GONE);
+            }else {
+                ((ItemViewHolder) holder).ivMsg.setVisibility(View.GONE);
+                ((ItemViewHolder) holder).tvMsg.setVisibility(View.VISIBLE);
+                ((ItemViewHolder) holder).tvMsg.setText(msg);
+            }
 
             String avatarUrl = "";
             if(getItemViewType(position) == TYPE_OTHER){
@@ -195,6 +217,8 @@ public class ChatFragment extends BaseFragment {
             ImageView ivAvatar;
             @BindView(R.id.tv_msg)
             TextView tvMsg;
+            @BindView(R.id.iv_msg)
+            ImageView ivMsg;
             @BindView(R.id.container)
             View container;
 
@@ -217,6 +241,11 @@ public class ChatFragment extends BaseFragment {
         if (result) {
             mEt.setText("");
         }
+    }
+
+    @OnClick(R.id.btn_image)
+    public void sendFile() {
+        selectImage();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -246,6 +275,49 @@ public class ChatFragment extends BaseFragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         //menu状态被重置, 需要刷新
         MainActivity.setOnlineDrawable();
+    }
+
+    private static int REQUEST_GET_IMAGE = 1;
+
+    private void selectImage() {
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/*");
+        startActivityForResult(intent, REQUEST_GET_IMAGE);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == REQUEST_GET_IMAGE && resultCode == RESULT_OK){
+            Uri uri = data.getData();
+            Log.e("uri", uri.toString());
+            ContentResolver cr = mActivity.getContentResolver();
+            try {
+                Bitmap bitmap = BitmapFactory.decodeStream(cr.openInputStream(uri));
+                // 获取缩略图-压缩大小
+                Bitmap thumbnail = ThumbnailUtils.extractThumbnail(bitmap, 500, 500);
+
+                // 保存到本地-压缩质量
+                String path = Utils.saveBitmap(thumbnail);
+
+                // 发送图片
+                ChatManager.sendFile(isPair ? 1 : 0, mName, new File(path), new SendFileCallback() {
+                    @Override
+                    public void onSuccess() {
+                        Utils.toast("发送图片完成");
+                    }
+
+                    @Override
+                    public void onFailure(String reason) {
+                        Utils.toast("发送图片失败 " + reason);
+                    }
+                });
+
+            } catch (Exception e) {
+                Utils.toast("发送图片失败 " + e.getMessage());
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
 }

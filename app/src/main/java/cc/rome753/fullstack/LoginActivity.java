@@ -15,7 +15,7 @@ import butterknife.BindView;
 import butterknife.OnClick;
 import cc.rome753.fullstack.bean.Login;
 import cc.rome753.fullstack.bean.Register;
-import cc.rome753.fullstack.event.HttpHandler;
+import cc.rome753.fullstack.callback.HttpHandler;
 import cc.rome753.fullstack.main.MainActivity;
 import cc.rome753.fullstack.manager.OkhttpManager;
 import cc.rome753.fullstack.manager.UserManager;

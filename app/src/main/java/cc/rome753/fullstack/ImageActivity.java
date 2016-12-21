@@ -17,7 +17,7 @@ import com.bumptech.glide.Glide;
 import java.io.File;
 
 import butterknife.BindView;
-import cc.rome753.fullstack.event.HttpHandler;
+import cc.rome753.fullstack.callback.HttpHandler;
 import cc.rome753.fullstack.manager.OkhttpManager;
 import uk.co.senab.photoview.PhotoView;
 

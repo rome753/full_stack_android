@@ -89,7 +89,7 @@ public class DbManager {
         }else{
             condition = RecentMsgDao.Properties.From.eq(msg.from);
         }
-        
+
         RecentMsg oldMsg = mRecentMsgDao.queryBuilder().where(condition).unique();
         if(oldMsg == null){
             mRecentMsgDao.insert(msg);

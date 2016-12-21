@@ -10,7 +10,7 @@ import org.json.JSONObject;
 
 import butterknife.BindView;
 import butterknife.OnClick;
-import cc.rome753.fullstack.event.HttpHandler;
+import cc.rome753.fullstack.callback.HttpHandler;
 import cc.rome753.fullstack.manager.OkhttpManager;
 
 public class UserEditActivity extends BaseActivity {

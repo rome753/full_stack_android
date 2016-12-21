@@ -6,7 +6,7 @@ import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 import cc.rome753.fullstack.App;
-import cc.rome753.fullstack.event.HttpHandler;
+import cc.rome753.fullstack.callback.HttpHandler;
 import okhttp3.Call;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;

@@ -1,4 +1,4 @@
-package cc.rome753.fullstack.event;
+package cc.rome753.fullstack.callback;
 
 import java.io.IOException;
 

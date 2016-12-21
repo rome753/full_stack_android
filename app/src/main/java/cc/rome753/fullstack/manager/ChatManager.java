@@ -5,13 +5,16 @@ import android.util.Log;
 import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.greendao.annotation.NotNull;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import cc.rome753.fullstack.bean.ChatMsg;
 import cc.rome753.fullstack.bean.ChatSend;
 import cc.rome753.fullstack.bean.RecentMsg;
+import cc.rome753.fullstack.callback.SendFileCallback;
 import cc.rome753.fullstack.event.WsComesEvent;
 import cc.rome753.fullstack.event.WsFailureEvent;
 import cc.rome753.fullstack.event.WsLeavesEvent;
@@ -34,11 +37,12 @@ import okio.BufferedSource;
 
 public class ChatManager {
 
-    private ChatManager(){}
+    private ChatManager() {
+    }
 
     public static final String ALL_NAME = "";
 
-    private static String SCHEME="ws://";
+    private static String SCHEME = "ws://";
 
     public static String PATH = "chat";
 
@@ -49,10 +53,10 @@ public class ChatManager {
     /**
      * 打开聊天ws连接
      */
-    public static void open(){
-        if(mWebSocket != null) return;
+    public static void open() {
+        if (mWebSocket != null) return;
         Log.d("WebSocket", "openChat");
-        if(mOkhttpClient == null){
+        if (mOkhttpClient == null) {
             mOkhttpClient = new OkHttpClient.Builder()
                     .readTimeout(0, TimeUnit.SECONDS)//长连接设置为无超时
                     .writeTimeout(0, TimeUnit.SECONDS)//长连接设置为无超时
@@ -70,13 +74,13 @@ public class ChatManager {
                 mWebSocket = webSocket;
                 EventBus.getDefault().post(new WsOpenEvent());
                 //注册fsid和name
-                String idName = UserManager.getUser().getId()+ UserManager.getUser().getName();
+                String idName = UserManager.getUser().getId() + UserManager.getUser().getName();
                 sendId(idName);
             }
 
             @Override
             public void onFailure(IOException e, Response response) {
-                Log.e("WebSocket","onFailure: " + e);
+                Log.e("WebSocket", "onFailure: " + e);
                 mWebSocket = null;
                 EventBus.getDefault().post(new WsFailureEvent(e.getMessage()));
             }
@@ -87,7 +91,7 @@ public class ChatManager {
                 Log.d("WebSocket", "onMessage:" + jsonMsg);
                 if (message.contentType() == WebSocket.TEXT) {
                     ChatMsg msg = new Gson().fromJson(jsonMsg, ChatMsg.class);
-                    switch (msg.type){
+                    switch (msg.type) {
                         case -1://我发给某人, 服务器转发给我, msg.from代表某人
                         case 0://发送给所有人的消息
                         case 1://某人发送给我, msg.from代表某人
@@ -107,6 +111,7 @@ public class ChatManager {
                     }
                 } else {
                     BufferedSource source = message.source();
+
                     Log.d("WebSocket", "onMessage:" + source.readByteString());
                 }
                 message.close();
@@ -119,15 +124,15 @@ public class ChatManager {
 
             @Override
             public void onClose(int code, String reason) {
-                Log.d("WebSocketCall","onClose: "+reason);
+                Log.d("WebSocketCall", "onClose: " + reason);
                 mWebSocket = null;
 //                EventBus.getDefault().post(new WsCloseEvent());
             }
         });
     }
 
-    public static void close(){
-        if(mWebSocket != null){
+    public static void close() {
+        if (mWebSocket != null) {
             try {
                 mWebSocket.close(1000, "主动关闭");
             } catch (IOException e) {
@@ -136,23 +141,23 @@ public class ChatManager {
         }
     }
 
-    private static boolean sendId(String id){
+    private static boolean sendId(String id) {
         ChatSend c = new ChatSend(99, "", id);
         return send(c);
     }
 
-    public static boolean send2All(String msg){
+    public static boolean send2All(String msg) {
         ChatSend c = new ChatSend(0, ALL_NAME, msg);
         return send(c);
     }
 
-    public static boolean send2User(String to, String msg){
+    public static boolean send2User(String to, String msg) {
         ChatSend c = new ChatSend(1, to, msg);
         return send(c);
     }
 
-    private static boolean send(ChatSend chatSend){
-        if(mWebSocket != null){
+    private static boolean send(ChatSend chatSend) {
+        if (mWebSocket != null) {
             try {
                 String json = new Gson().toJson(chatSend);
                 mWebSocket.sendMessage(RequestBody.create(WebSocket.TEXT, json));
@@ -164,11 +169,28 @@ public class ChatManager {
         return false;
     }
 
+    public static void sendFile(int type, String to, File file, @NotNull  SendFileCallback callback) {
+        if (mWebSocket == null) callback.onFailure("未连接");
+        try {
+            //发送文件
+            mWebSocket.sendMessage(RequestBody.create(WebSocket.BINARY, file));
+            //发送文件描述信息
+            ChatSend c = new ChatSend(type, to, "image://");
+            String json = new Gson().toJson(c);
+            mWebSocket.sendMessage(RequestBody.create(WebSocket.TEXT, json));
+            callback.onSuccess();
+        } catch (Exception e) {
+            e.printStackTrace();
+            callback.onFailure(e.getMessage());
+        }
+    }
+
     /**
      * 聊天是否在线
+     *
      * @return
      */
-    public static boolean isOnline(){
+    public static boolean isOnline() {
         return mWebSocket != null;
     }
 
