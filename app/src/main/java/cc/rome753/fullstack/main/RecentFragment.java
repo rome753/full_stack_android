@@ -101,7 +101,8 @@ public class RecentFragment extends BaseFragment {
             Utils.loadAvatar(mActivity, msg.avatar, ((ItemViewHolder)holder).ivAvatar, 15);
             ((ItemViewHolder)holder).tvName.setText(msg.type == 0 ? "群聊" : msg.from);
             ((ItemViewHolder)holder).tvMsg.setText(msg.msg);
-            ((ItemViewHolder)holder).tvTime.setText(msg.time + "");
+            String timeline = Utils.timestampToTimelineTime(msg.time);
+            ((ItemViewHolder)holder).tvTime.setText(timeline);
 
             if(onItemClickListener != null){
                 ((ItemViewHolder)holder).container.setOnClickListener(new View.OnClickListener() {

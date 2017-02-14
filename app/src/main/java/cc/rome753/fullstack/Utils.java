@@ -3,6 +3,7 @@ package cc.rome753.fullstack;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.text.TextUtils;
+import android.text.format.Time;
 import android.util.Pair;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
@@ -145,5 +146,65 @@ public class Utils {
                     .into(imageView);
 
         }
+    }
+
+    public static String timestampToTimelineTime(long timestamp) {
+        if (timestamp > System.currentTimeMillis()) {
+            return "刚刚";
+        }
+
+        long diffTime = System.currentTimeMillis()/1000 - timestamp;
+        if (diffTime < 60) {
+            return "刚刚";
+        }
+        diffTime /= 60;
+        if (diffTime < 60) {
+            return diffTime + "分钟前";
+        }
+        diffTime /= 60;
+        if (diffTime < 24) {
+            return diffTime + "小时前";
+        }
+        diffTime /= 24;
+        if (diffTime < 30) {
+            return diffTime + "天前";
+        }
+
+        Time currentTime = new Time();
+        Time mTime = new Time();
+
+        currentTime.setToNow();
+        mTime.set(timestamp);
+
+        int mYear = mTime.year;
+        int mMonth = mTime.month + 1;
+        int mDay = mTime.monthDay;
+        int mHour = mTime.hour;
+        int mMinute = mTime.minute;
+        int mSecond = mTime.second;
+
+        int currentYear = currentTime.year;
+        int currentMonth = currentTime.month + 1;
+        int currentDay = currentTime.monthDay;
+        int currentHour = currentTime.hour;
+        int currentMinute = currentTime.minute;
+        int currentSecond = currentTime.second;
+
+        if (mYear != currentYear) {
+            return (currentYear - mYear) + "年前";
+        }
+        if (mMonth != currentMonth) {
+            return mMonth + "月" + mDay + "日";
+        }
+        if (mDay != currentDay) {
+            return (currentDay - mDay) + "天前";
+        }
+        if (mHour != currentHour) {
+            return (currentHour - mHour) + "小时前";
+        }
+        if (mMinute != currentMinute) {
+            return (currentMinute - mMinute) + "分钟前";
+        }
+        return (currentSecond - mSecond) + "秒前";
     }
 }

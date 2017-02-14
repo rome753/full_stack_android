@@ -24,11 +24,10 @@ import cc.rome753.fullstack.R;
 import cc.rome753.fullstack.Utils;
 import cc.rome753.fullstack.bean.User;
 import cc.rome753.fullstack.bean.response.OnlineUsers;
-import cc.rome753.fullstack.callback.OnItemClickListener;
 import cc.rome753.fullstack.callback.HttpHandler;
+import cc.rome753.fullstack.callback.OnItemClickListener;
 import cc.rome753.fullstack.manager.OkhttpManager;
 import cc.rome753.fullstack.manager.UserManager;
-import cc.rome753.fullstack.view.DividerItemDecoration;
 
 import static cc.rome753.fullstack.main.MainActivity.setOnlineDrawable;
 
@@ -69,7 +68,7 @@ public class FindFragment extends BaseFragment {
         mAdapter = new UserAdapter();
         mRvUsers.setLayoutManager(new LinearLayoutManager(mActivity));
         mRvUsers.setItemAnimator(new DefaultItemAnimator());
-        mRvUsers.addItemDecoration(new DividerItemDecoration(mActivity, DividerItemDecoration.VERTICAL_LIST));
+//        mRvUsers.addItemDecoration(new DividerItemDecoration(mActivity, DividerItemDecoration.VERTICAL_LIST));
         mAdapter.setOnItemClickListener(new OnItemClickListener() {
 
             @Override
